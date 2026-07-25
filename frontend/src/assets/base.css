@@ -1,0 +1,63 @@
+/* Slick Design System */
+:root {
+  /* Colors */
+  --color-primary: #3498db; /* A vibrant blue */
+  --color-primary-light: #5dade2;
+  --color-primary-dark: #2c81ba;
+  
+  --color-secondary: #f0f2f5; /* A light gray for backgrounds */
+  --color-background: var(--color-secondary);
+  --color-surface: #ffffff; /* For cards and surfaces */
+
+  --color-text: #2c3e50; /* Dark slate for text */
+  --color-text-light: #7f8c8d; /* Lighter gray for secondary text */
+  
+  --color-border: #e0e6ed;
+  --color-border-hover: #b8c6d6;
+  
+  --color-success: #2ecc71;
+  --color-error: #e74c3c;
+  --color-warning: #f39c12;
+
+  /* Typography */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.6;
+
+  /* Spacing */
+  --space-unit: 8px;
+  --space-xs: calc(0.5 * var(--space-unit));  /* 4px */
+  --space-sm: var(--space-unit);             /* 8px */
+  --space-md: calc(2 * var(--space-unit));    /* 16px */
+  --space-lg: calc(3 * var(--space-unit));    /* 24px */
+  --space-xl: calc(4 * var(--space-unit));    /* 32px */
+
+  /* Borders & Shadows */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --box-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --box-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  /* AgnosticUI Overrides */
+  --agnostic-header-content-width: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+

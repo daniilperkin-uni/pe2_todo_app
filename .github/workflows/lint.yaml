@@ -1,0 +1,42 @@
+name: Lint
+on:
+  push:
+    branches-ignore:
+      - 'automated*'
+      - 'tutor*'
+      - 'feedback*'
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.workflow }}-${{ github.head_ref || github.ref }}"
+  cancel-in-progress: true
+jobs:
+#  Dislabed - enable, if you are confident in writing linted markdown
+#  lint-md:
+#    runs-on: [self-hosted, linux, ubuntu-latest]
+#    steps:
+#      - name: Set up Git repository
+#        uses: actions/checkout@v4
+#      - name: Lint
+#        uses: DavidAnson/markdownlint-cli2-action@v17
+#        with:
+#          globs: |
+#            **/*.md
+  lint-js:
+    runs-on: self-hosted
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v4
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+      - name: npm ci
+        run: |
+          cd frontend
+          npm ci
+      - name: npm run lint
+        run: |
+          cd frontend
+          npm run lint

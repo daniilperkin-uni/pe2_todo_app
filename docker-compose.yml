@@ -1,0 +1,39 @@
+services:
+  database:
+    image: mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - database_data:/var/lib/mysql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: api/v1
+      target: production-stage
+    depends_on:
+      - api
+    # For local testing add a concrete port mapping here, e.g. "8000:80"
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+      target: production-stage
+    depends_on:
+      - database
+    restart: unless-stopped
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://database:3306/pe2?createDatabaseIfNotExist=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+volumes:
+  database_data:
