@@ -29,7 +29,7 @@ Diese Option startet sowohl die MariaDB-Datenbank als auch das Spring Boot-Backe
 
 1.  **Navigieren Sie zum Projekt-Root-Verzeichnis:**
     ```bash
-    cd PE2ToDoProjekt
+    cd pe2_todo_app
     ```
 2.  **Starten Sie die Dienste:**
     ```bash

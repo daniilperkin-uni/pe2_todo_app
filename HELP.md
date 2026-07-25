@@ -21,7 +21,7 @@ You will see it below.
     - Open git bash\
       ![git-bash](img/git-bash.png)
     - In git bash: `cd /c/git-repositories`
-    - `git clone https://github.tik.uni-stuttgart.de/ISTE-ESE/rest-api-spa-example.git`
+    - `git clone [University Internal Git Template Repository]`
 
 3. Install Visual Studio Code.
 
@@ -56,13 +56,13 @@ It is not needed to install [Maven](https://maven.apache.org/) - the scripts (`m
 2. "Trust Project"
 3. Close "Install AI Assistant" (by clicking the symbol on the right)
 4. "Low memory" warning will pop up. Choose "Configure" and set the "Maximum Heap Size" to 2000. Click "Save and Restart".
-5. Add a Java JDK by: Project -> right click -> Module Settings -> SDKs -> "+" -_> "Download SDK" -> Version "25" -> Download -> wait -> "OK"
+5. Add a Java JDK by: Project -> right click -> Module Settings -> SDKs -> "+" -_> "Download SDK" -> Version "21" -> Download -> wait -> "OK"
 6. Run `spring-boot:run`\
    ![maven task spring-boot-run](img/spring-boot-run.png)
 7. A warning will appear
 8. Choose the downloaded JDK\
-   ![JDK25](img/corretto-25.png)
-9. Set language level to 25.
+   ![JDK21](img/corretto-21.png)
+9. Set language level to 21.
 10. "OK"
 11. In the "Run" window, there will be an error - because MariaDB is not started (yet).
 
