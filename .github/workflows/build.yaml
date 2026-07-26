@@ -28,6 +28,7 @@ jobs:
       - name: check if backend builds
         run: |
           cd api
+          chmod +x mvnw
           ./mvnw clean install -DskipTests=true
       - name: run backend tests
         run: |

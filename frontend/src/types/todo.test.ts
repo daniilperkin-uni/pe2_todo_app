@@ -29,7 +29,7 @@ describe('Todo type contracts', () => {
     expect(todo.finished).toBe(false)
     expect(todo.priority).toBe('HIGH')
     expect(todo.assigneeList).toHaveLength(1)
-    expect(todo.assigneeList[0].email).toBe('john@example.com')
+    expect(todo.assigneeList[0]?.email).toBe('john@example.com')
   })
 
   it('should accept all Priority values', () => {
