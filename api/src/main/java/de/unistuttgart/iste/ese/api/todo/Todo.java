@@ -50,7 +50,7 @@ public class Todo {
     private LocalDate finishedDate;
 
     // Liste der zuständigen Personen für diese Todo
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     @JoinTable(
         name = "todo_assignee",
         joinColumns = @JoinColumn(name = "todo_id"),

@@ -1,6 +1,5 @@
 package de.unistuttgart.iste.ese.api.assignee;
 
-import ch.qos.logback.classic.Logger;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,7 +30,6 @@ public class Assignee {
     @Email(message = "Email should be valid")
     @Column(nullable = false, unique = true)
     private String email;
-    private Logger logger;
 
     // Getter und Setter
     /**

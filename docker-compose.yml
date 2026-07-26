@@ -3,9 +3,14 @@ services:
     image: mariadb
     restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: root
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
       - database_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build:
@@ -27,12 +32,13 @@ services:
       dockerfile: ./api/Dockerfile
       target: production-stage
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     restart: unless-stopped
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://database:3306/pe2?createDatabaseIfNotExist=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=root
+      - DB_URL=jdbc:mariadb://database:3306/pe2?createDatabaseIfNotExist=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-root}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
 volumes:
