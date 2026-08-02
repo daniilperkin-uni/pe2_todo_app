@@ -144,8 +144,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <parallel>methods</parallel>
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
+                    <!-- Run tests sequentially. @SpringBootTest classes share a single
+                         application context and H2 database, so parallel execution
+                         (parallel=methods or classes) races on shared JPA state. -->
                     <statelessTestsetReporter implementation="org.apache.maven.plugin.surefire.extensions.junit5.JUnit5Xml30StatelessReporter">
                         <disable>false</disable>
                         <version>3.0.2</version>

@@ -80,8 +80,14 @@ public class Todo {
 
     /**
      * Setzt die ID des Todos
+     *
+     * @throws IllegalStateException if the id has already been assigned (the id is
+     *     JPA-generated and must not be mutated after persist)
      */
     public void setId(Long id) {
+        if (this.id != null) {
+            throw new IllegalStateException("Todo id is already set to " + this.id + " and cannot be mutated.");
+        }
         this.id = id;
     }
 
@@ -150,8 +156,16 @@ public class Todo {
 
     /**
      * Setzt das Erstellungsdatum des Todos
+     *
+     * @throws IllegalStateException if the created date has already been set, as it
+     *     is an audit timestamp populated by {@link #onCreate()} via @PrePersist and
+     *     must not be overridden
      */
     public void setCreatedDate(LocalDate createdDate) {
+        if (this.createdDate != null) {
+            throw new IllegalStateException(
+                "createdDate is set by @PrePersist and cannot be overridden.");
+        }
         this.createdDate = createdDate;
     }
 

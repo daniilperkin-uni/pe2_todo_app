@@ -19,6 +19,17 @@
   --color-error: #e74c3c;
   --color-warning: #f39c12;
 
+  /* Priority tag colors (themeable) */
+  --color-priority-low-bg: #eaf7eb;
+  --color-priority-low: #58a15c;
+  --color-priority-medium-bg: #fdf3e6;
+  --color-priority-medium: #e49122;
+  --color-priority-high-bg: #fbeae9;
+  --color-priority-high: #d14343;
+
+  /* Alternate surface for finished / muted cards */
+  --color-surface-alt: #fafafa;
+
   /* Typography */
   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   --font-size-base: 16px;

@@ -25,7 +25,7 @@ function handleDelete(id: number) {
 <template>
   <div class="todo-list-container">
     <div v-if="todos.length === 0" class="no-todos-message card">
-      Keine Aufgaben gefunden.
+      No tasks found.
     </div>
     <div v-else class="todo-list">
       <TodoItem

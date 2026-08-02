@@ -94,9 +94,13 @@ public class TodoService {
         todo.setDescription(dto.getDescription());
         todo.setDueDate(dto.getDueDate());
 
+        if (dto.getPriority() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Priority must not be null. Must be LOW, MEDIUM, or HIGH.");
+        }
         try {
             todo.setPriority(Priority.valueOf(dto.getPriority().toUpperCase()));
-        } catch (IllegalArgumentException | NullPointerException e) {
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid priority value. Must be LOW, MEDIUM, or HIGH.");
         }
 

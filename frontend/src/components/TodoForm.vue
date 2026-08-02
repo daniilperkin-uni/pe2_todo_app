@@ -27,14 +27,15 @@ const errors = ref<{ [key: string]: string }>({});
 
 const priorities: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
 
-// Ruft die Liste der verfügbaren Zuständigen vom Backend ab.
+// Fetches the list of available assignees from the backend.
 async function fetchAssignees() {
   isLoadingAssignees.value = true;
   try {
     availableAssignees.value = await getAssignees();
   } catch (error) {
     console.error('Error fetching assignees for form:', error);
-    // In case of error, availableAssignees will remain empty or with offline data if getAssignees provided it
+    // On error, availableAssignees stays empty so the form shows the
+    // "No assignees available." placeholder instead of fabricated data.
   } finally {
     isLoadingAssignees.value = false;
   }
@@ -48,30 +49,39 @@ watchEffect(() => {
       finished: props.initialTodo.finished,
       priority: props.initialTodo.priority,
       dueDate: props.initialTodo.dueDate,
-      assigneeIdList: props.initialTodo.assigneeList?.map(a => a.id) || [],
+      assigneeIdList: props.initialTodo.assigneeList?.map((a) => a.id) || [],
     };
   }
 });
 
-// Validiert die Formularfelder des ToDos.
+// Validates the form fields. The due date, when provided, must lie strictly
+// in the future to match the backend rule in TodoService.validateDueDate.
 function validateForm() {
   errors.value = {};
   if (!todoForm.value.title) {
-    errors.value.title = 'Titel ist erforderlich.';
+    errors.value.title = 'Title is required.';
   }
-  // Optional: Add more validation for dueDate, etc.
-
+  if (todoForm.value.dueDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(todoForm.value.dueDate + 'T00:00:00');
+    if (isNaN(due.getTime())) {
+      errors.value.dueDate = 'Due date is not a valid date.';
+    } else if (due.getTime() <= today.getTime()) {
+      errors.value.dueDate = 'Due date must be in the future.';
+    }
+  }
   return Object.keys(errors.value).length === 0;
 }
 
-// Verarbeitet das Absenden des Formulars und emittiert das 'submit'-Event.
+// Handles form submission and emits the 'submit' event when validation passes.
 function handleSubmit() {
   if (validateForm()) {
     emit('submit', todoForm.value);
   }
 }
 
-// Emittiert das 'cancel'-Event.
+// Emits the 'cancel' event.
 function handleCancel() {
   emit('cancel');
 }
@@ -82,23 +92,29 @@ onMounted(fetchAssignees);
 <template>
   <form @submit.prevent="handleSubmit" class="todo-form card border-none">
     <div class="form-group">
-      <label for="title">Titel:</label>
+      <label for="title">Title:</label>
       <input type="text" id="title" v-model="todoForm.title" @input="delete errors.title" />
       <span v-if="errors.title" class="error-message">{{ errors.title }}</span>
     </div>
 
     <div class="form-group">
-      <label for="description">Beschreibung:</label>
+      <label for="description">Description:</label>
       <textarea id="description" v-model="todoForm.description"></textarea>
     </div>
 
     <div class="form-group">
-      <label for="dueDate">Fälligkeitsdatum:</label>
-      <input type="date" id="dueDate" v-model="todoForm.dueDate" />
+      <label for="dueDate">Due Date:</label>
+      <input
+        type="date"
+        id="dueDate"
+        v-model="todoForm.dueDate"
+        @change="delete errors.dueDate"
+      />
+      <span v-if="errors.dueDate" class="error-message">{{ errors.dueDate }}</span>
     </div>
 
     <div class="form-group">
-      <label for="priority">Priorität:</label>
+      <label for="priority">Priority:</label>
       <select id="priority" v-model="todoForm.priority">
         <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
       </select>
@@ -118,12 +134,12 @@ onMounted(fetchAssignees);
 
     <div class="form-group checkbox-group">
       <input type="checkbox" id="finished" v-model="todoForm.finished" />
-      <label for="finished">Erledigt</label>
+      <label for="finished">Finished</label>
     </div>
 
     <div class="form-actions">
       <Button type="submit" mode="primary">{{ isEdit ? 'Update Todo' : 'Create Todo' }}</Button>
-      <Button type="button" mode="secondary" @click="handleCancel">Abbrechen</Button>
+      <Button type="button" mode="secondary" @click="handleCancel">Cancel</Button>
     </div>
   </form>
 </template>
@@ -142,22 +158,22 @@ onMounted(fetchAssignees);
   margin-bottom: 5px;
   font-weight: bold;
 }
-.form-group input[type="text"],
-.form-group input[type="date"],
+.form-group input[type='text'],
+.form-group input[type='date'],
 .form-group select,
 .form-group textarea {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
 }
 .form-group select[multiple] {
   min-height: 100px;
 }
 .form-hint {
   font-size: 0.8em;
-  color: #666;
+  color: var(--color-text-light);
   margin-top: 5px;
   display: block;
 }
@@ -170,7 +186,7 @@ onMounted(fetchAssignees);
   margin-right: 10px;
 }
 .error-message {
-  color: red;
+  color: var(--color-error);
   font-size: 0.9em;
   margin-top: 5px;
   display: block;

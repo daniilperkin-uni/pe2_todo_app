@@ -26,7 +26,7 @@ const assigneeNames = computed(() => {
   if (!props.todo.assigneeList || props.todo.assigneeList.length === 0) {
     return 'Not assigned';
   }
-  return props.todo.assigneeList.map(a => `${a.prename} ${a.name}`).join(', ');
+  return props.todo.assigneeList.map((a) => `${a.prename} ${a.name}`).join(', ');
 });
 
 function handleToggleFinished() {
@@ -94,7 +94,7 @@ function handleDelete() {
 }
 
 .is-finished {
-  background-color: #fafafa;
+  background-color: var(--color-surface-alt);
 }
 
 .is-finished .todo-title,
@@ -152,16 +152,16 @@ function handleDelete() {
 }
 
 .priority-tag.priority-low {
-  background-color: #eaf7eb;
-  color: #58a15c;
+  background-color: var(--color-priority-low-bg);
+  color: var(--color-priority-low);
 }
 .priority-tag.priority-medium {
-  background-color: #fdf3e6;
-  color: #e49122;
+  background-color: var(--color-priority-medium-bg);
+  color: var(--color-priority-medium);
 }
 .priority-tag.priority-high {
-  background-color: #fbeae9;
-  color: #d14343;
+  background-color: var(--color-priority-high-bg);
+  color: var(--color-priority-high);
 }
 
 .todo-actions {
