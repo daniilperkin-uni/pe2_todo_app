@@ -41,8 +41,14 @@ public class Assignee {
 
     /**
      * Setzt die ID
+     *
+     * @throws IllegalStateException if the id has already been assigned (the id is
+     *     JPA-generated and must not be mutated after persist)
      */
     public void setId(Long id) {
+        if (this.id != null) {
+            throw new IllegalStateException("Assignee id is already set to " + this.id + " and cannot be mutated.");
+        }
         this.id = id;
     }
 
