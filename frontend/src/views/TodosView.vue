@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import type { Todo } from '@/types/todo';
 import { getTodos, updateTodo, deleteTodo, downloadTodosCsv } from '@/services/apiService';
 import TodoList from '@/components/TodoList.vue';
+import { applyDueFilter, type DueFilter } from '@/ts/dueDateFilters';
 import { showToast, Toast } from '@/ts/toasts';
 import { Button } from 'agnostic-vue';
 import { saveAs } from 'file-saver';
@@ -18,7 +19,16 @@ const todoToDelete = ref<number | null>(null);
 
 // Filter and Sort states
 const filterTitle = ref<string>('');
+const filterDue = ref<DueFilter>('all');
 const sortBy = ref<string>('createdDate');
+
+const dueFilterOptions: { value: DueFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'dueToday', label: 'Due today' },
+  { value: 'dueThisWeek', label: 'Due this week' },
+  { value: 'overdue', label: 'Overdue' },
+  { value: 'noDueDate', label: 'No due date' },
+];
 
 const filteredAndSortedTodos = computed(() => {
   let result = [...todos.value];
@@ -28,6 +38,9 @@ const filteredAndSortedTodos = computed(() => {
     const search = filterTitle.value.toLowerCase();
     result = result.filter((t) => t.title.toLowerCase().includes(search));
   }
+
+  // Filter by due date
+  result = applyDueFilter(result, filterDue.value);
 
   // Sort
   result.sort((a, b) => {
@@ -175,6 +188,14 @@ onMounted(fetchTodos);
           placeholder="Search todos..."
           class="search-input"
         />
+      </div>
+      <div class="filter-group">
+        <label for="filter-due">Filter by Due:</label>
+        <select id="filter-due" v-model="filterDue" class="sort-select">
+          <option v-for="option in dueFilterOptions" :key="option.value" :value="option.value">
+            {{ option.label }}
+          </option>
+        </select>
       </div>
       <div class="sort-group">
         <label for="sort-by">Sort by:</label>

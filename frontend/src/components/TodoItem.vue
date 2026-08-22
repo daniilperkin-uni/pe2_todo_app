@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, computed } from 'vue';
 import type { Todo } from '@/types/todo';
+import { isOverdue } from '@/ts/dueDateFilters';
 import { Button } from 'agnostic-vue';
 
 const props = defineProps<{
@@ -8,6 +9,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(['toggle-finished', 'edit', 'delete']);
+
+const overdue = computed(() => isOverdue(props.todo));
 
 const priorityClass = computed(() => {
   switch (props.todo.priority) {
@@ -61,6 +64,7 @@ function handleDelete() {
           <span v-if="todo.dueDate" class="meta-tag due-date-tag">
             Due: {{ new Date(todo.dueDate).toLocaleDateString() }}
           </span>
+          <span v-if="overdue" class="meta-tag overdue-tag">Overdue</span>
         </div>
       </div>
     </div>
@@ -162,6 +166,12 @@ function handleDelete() {
 .priority-tag.priority-high {
   background-color: var(--color-priority-high-bg);
   color: var(--color-priority-high);
+}
+
+.overdue-tag {
+  background-color: var(--color-priority-high-bg);
+  color: var(--color-priority-high);
+  font-weight: 700;
 }
 
 .todo-actions {
