@@ -4,7 +4,7 @@ Dieses Projekt ist eine Full-Stack-Webanwendung zur Verwaltung von ToDo-Listen, 
 
 ## Verwendete Technologien
 
-*   **Backend:** Spring Boot 3.2.5, Java 21, Maven, MariaDB (Laufzeit), H2 (Tests), JUnit 5, Springdoc OpenAPI
+*   **Backend:** Spring Boot 3.5.16, Java 21, Maven, MariaDB (Laufzeit), H2 (Tests), JUnit 5, Springdoc OpenAPI
 *   **Frontend:** Vue 3, TypeScript, Vite, Vue Router, AgnosticUI (für Komponenten), ESLint, Prettier
 *   **Datenbank:** MariaDB
 *   **Containerisierung:** Docker, Docker Compose
