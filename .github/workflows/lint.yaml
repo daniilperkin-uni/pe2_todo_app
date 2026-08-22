@@ -36,7 +36,7 @@ jobs:
         run: |
           cd frontend
           npm ci
-      - name: npm run lint
+      - name: npm run lint:ci
         run: |
           cd frontend
-          npm run lint
+          npm run lint:ci

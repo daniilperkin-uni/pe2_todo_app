@@ -10,6 +10,7 @@
         "build-only": "vite build",
         "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
         "lint": "eslint . --fix --ignore-pattern .gitignore",
+        "lint:ci": "eslint . --ignore-pattern .gitignore",
         "format": "prettier --write src",
         "test": "vitest run"
     },
