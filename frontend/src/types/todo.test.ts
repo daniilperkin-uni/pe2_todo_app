@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import type { Todo, TodoCreateUpdate, Priority } from './todo'
 import type { Assignee } from './assignee'
+import { Toast, activeToasts, showToast } from '@/ts/toasts'
 
 describe('Todo type contracts', () => {
   it('should create a valid Todo object', () => {
@@ -93,3 +94,21 @@ describe('Assignee type contracts', () => {
     expect(dto.name).toBe('Smith')
   })
 })
+
+describe('Toast utility tests', () => {
+  it('should create a Toast instance with defaults and allow closing', () => {
+    const toast = new Toast('Test Title', 'Test Message', 'success')
+    expect(toast.title).toBe('Test Title')
+    expect(toast.message).toBe('Test Message')
+    expect(toast.type).toBe('success')
+    expect(toast.expired).toBe(false)
+
+    showToast(toast)
+    expect(activeToasts.value.some((t) => t.title === 'Test Title')).toBe(true)
+
+    toast.close()
+    expect(toast.expired).toBe(true)
+    expect(activeToasts.value.some((t) => t.title === 'Test Title')).toBe(false)
+  })
+})
+
