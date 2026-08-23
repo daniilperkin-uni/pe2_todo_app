@@ -5,6 +5,7 @@ import de.unistuttgart.iste.ese.api.assignee.AssigneeRepository;
 import de.unistuttgart.iste.ese.api.assignee.dto.AssigneeDTO;
 import de.unistuttgart.iste.ese.api.todo.dto.TodoCreateUpdateDTO;
 import de.unistuttgart.iste.ese.api.todo.dto.TodoDTO;
+import de.unistuttgart.iste.ese.api.todo.dto.TodoStatsDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -294,6 +295,63 @@ public class TodoService {
             ));
         result.putAll(grouped);
         return result;
+    }
+
+    /**
+     * Aggregates statistics over all todos: completion rate, average
+     * created-to-finished duration, and per-priority, per-category and
+     * per-assignee counts.
+     *
+     * <p>All aggregation happens in Java over one repository read - no
+     * database-side grouping - which keeps the logic unit-testable without
+     * a database.
+     *
+     * @return the aggregated statistics; never {@code null}
+     */
+    @Transactional(readOnly = true)
+    public TodoStatsDTO getTodoStats() {
+        List<Todo> allTodos = todoRepository.findAll();
+        TodoStatsDTO stats = new TodoStatsDTO();
+        stats.setTotalTodos(allTodos.size());
+
+        List<Todo> finished = allTodos.stream()
+            .filter(Todo::isFinished)
+            .toList();
+        stats.setFinishedTodos(finished.size());
+
+        // Average duration from creation to completion, in whole days.
+        java.util.OptionalDouble averageDays = finished.stream()
+            .filter(todo -> todo.getFinishedDate() != null && todo.getCreatedDate() != null)
+            .mapToLong(todo -> java.time.temporal.ChronoUnit.DAYS.between(
+                todo.getCreatedDate(), todo.getFinishedDate()))
+            .average();
+        stats.setAverageDaysToFinish(averageDays.isPresent() ? averageDays.getAsDouble() : null);
+
+        stats.setTodosPerPriority(allTodos.stream()
+            .collect(Collectors.groupingBy(
+                todo -> todo.getPriority().name(),
+                java.util.stream.Collectors.counting())));
+
+        stats.setTodosPerCategory(allTodos.stream()
+            .collect(Collectors.groupingBy(
+                todo -> todo.getCategory() != null ? todo.getCategory() : "unclassified",
+                java.util.stream.Collectors.counting())));
+
+        // Count each assignee across all todos, then map to display rows.
+        java.util.Map<Assignee, Long> assigneeCounts = allTodos.stream()
+            .flatMap(todo -> todo.getAssigneeList().stream())
+            .collect(Collectors.groupingBy(assignee -> assignee, Collectors.counting()));
+
+        stats.setTodosPerAssignee(assigneeCounts.entrySet().stream()
+            .map(entry -> new TodoStatsDTO.AssigneeCount(
+                entry.getKey().getId(),
+                entry.getKey().getPrename(),
+                entry.getKey().getName(),
+                entry.getValue()))
+            .sorted(java.util.Comparator.comparingLong(TodoStatsDTO.AssigneeCount::getCount).reversed())
+            .collect(Collectors.toList()));
+
+        return stats;
     }
 
     /**

@@ -17,6 +17,7 @@ import 'agnostic-vue/dist/index.css';
         <nav class="main-nav">
           <RouterLink to="/todos">Todos</RouterLink>
           <RouterLink to="/assignees">Assignees</RouterLink>
+          <RouterLink to="/stats">Stats</RouterLink>
         </nav>
       </div>
     </header>

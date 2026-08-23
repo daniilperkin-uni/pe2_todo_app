@@ -36,6 +36,11 @@ const router = createRouter({
       component: () => import('../views/BoardView.vue')
     },
     {
+      path: '/stats',
+      name: 'stats',
+      component: () => import('../views/TodoStatsView.vue')
+    },
+    {
       path: '/todos/create',
       name: 'create-todo',
       component: () => import('../views/CreateUpdateTodoView.vue')

@@ -2,6 +2,7 @@ package de.unistuttgart.iste.ese.api.todo;
 
 import de.unistuttgart.iste.ese.api.todo.dto.TodoCreateUpdateDTO;
 import de.unistuttgart.iste.ese.api.todo.dto.TodoDTO;
+import de.unistuttgart.iste.ese.api.todo.dto.TodoStatsDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,6 +73,17 @@ public class TodoController {
     @PutMapping("/{id}")
     public ResponseEntity<TodoDTO> updateTodo(@PathVariable Long id, @Valid @RequestBody TodoCreateUpdateDTO todoDTO) {
         return ResponseEntity.ok(todoService.updateTodo(id, todoDTO));
+    }
+
+    /**
+     * Retrieves aggregated statistics over all todos.
+     *
+     * @return completion rate, average days to finish, and per-priority,
+     *     per-category and per-assignee counts
+     */
+    @GetMapping("/stats")
+    public TodoStatsDTO getTodoStats() {
+        return todoService.getTodoStats();
     }
 
     /**

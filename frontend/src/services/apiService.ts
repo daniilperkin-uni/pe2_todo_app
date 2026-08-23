@@ -1,5 +1,6 @@
 import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee';
 import type { Todo, TodoCreateUpdate, TodoStatus } from '@/types/todo';
+import type { TodoStats } from '@/types/todoStats';
 
 const API_BASE_URL = '/api/v1';
 
@@ -203,6 +204,18 @@ export async function deleteTodo(id: number): Promise<void> {
     const errorText = await response.text();
     throw new Error(errorText || `API delete request failed with status ${response.status}`);
   }
+}
+
+/**
+ * Fetches aggregated todo statistics from the backend.
+ *
+ * @returns completion rate, average days to finish, and per-priority,
+ *     per-category and per-assignee counts
+ * @throws {Error} when the request fails or the backend returns a non-ok status
+ */
+export async function getTodoStats(): Promise<TodoStats> {
+  const response = await fetch(`${API_BASE_URL}/todos/stats`);
+  return await handleResponse<TodoStats>(response);
 }
 
 // --- CSV Download API Calls ---
