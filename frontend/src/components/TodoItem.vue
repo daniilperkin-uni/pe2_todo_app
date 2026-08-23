@@ -8,7 +8,7 @@ const props = defineProps<{
   todo: Todo;
 }>();
 
-const emit = defineEmits(['toggle-finished', 'edit', 'delete']);
+const emit = defineEmits(['toggle-finished', 'edit', 'delete', 'report-priority']);
 
 const overdue = computed(() => isOverdue(props.todo));
 
@@ -43,6 +43,11 @@ function handleEdit() {
 function handleDelete() {
   emit('delete', props.todo.id);
 }
+
+// Signals that the user rejects the predicted priority of this todo.
+function handleReportPriority() {
+  emit('report-priority', props.todo);
+}
 </script>
 
 <template>
@@ -73,6 +78,14 @@ function handleDelete() {
         {{ assigneeNames }}
       </div>
       <div class="action-buttons">
+        <button
+          type="button"
+          class="thumbs-down"
+          title="Wrong priority? Tell us the correct one."
+          @click="handleReportPriority"
+        >
+          👎
+        </button>
         <Button size="small" mode="secondary" @click="handleEdit">Edit</Button>
         <Button size="small" mode="danger" @click="handleDelete">Delete</Button>
       </div>
@@ -195,5 +208,20 @@ function handleDelete() {
 .action-buttons {
   display: flex;
   gap: var(--space-sm);
+  align-items: center;
+}
+
+.thumbs-down {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 2px 4px;
+  opacity: 0.7;
+}
+
+.thumbs-down:hover {
+  opacity: 1;
+  transform: scale(1.15);
 }
 </style>

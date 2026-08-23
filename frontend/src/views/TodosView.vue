@@ -2,12 +2,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Todo } from '@/types/todo';
-import { getTodos, updateTodo, deleteTodo, downloadTodosCsv } from '@/services/apiService';
+import { getTodos, updateTodo, deleteTodo, downloadTodosCsv, createPriorityCorrection } from '@/services/apiService';
 import TodoList from '@/components/TodoList.vue';
 import { applyDueFilter, type DueFilter } from '@/ts/dueDateFilters';
 import { showToast, Toast } from '@/ts/toasts';
 import { Button } from 'agnostic-vue';
 import { saveAs } from 'file-saver';
+import type { Priority } from '@/types/todo';
 
 const router = useRouter();
 const todos = ref<Todo[]>([]);
@@ -19,6 +20,11 @@ const viewMode = computed(() => (router.currentRoute.value.path === '/board' ? '
 // Identifier of the todo pending deletion confirmation, or null when the
 // confirmation dialog is closed. Replaces the blocking native confirm() call.
 const todoToDelete = ref<number | null>(null);
+
+// Todo whose predicted priority the user rejected; drives the correction dialog.
+const priorityFeedbackTodo = ref<Todo | null>(null);
+const correctedPriority = ref<Priority>('MEDIUM');
+const priorities: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
 
 // Filter and Sort states
 const filterTitle = ref<string>('');
@@ -151,6 +157,42 @@ function createNewTodo() {
   router.push('/todos/create');
 }
 
+/**
+ * Opens the priority-correction dialog for the given todo, preselecting a
+ * sensible default (the next-higher priority).
+ *
+ * @param todo - the todo whose predicted priority was rejected
+ */
+function openPriorityFeedback(todo: Todo) {
+  const order: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
+  const nextIndex = Math.min(order.indexOf(todo.priority) + 1, order.length - 1);
+  correctedPriority.value = order[nextIndex] ?? 'MEDIUM';
+  priorityFeedbackTodo.value = todo;
+}
+
+// Closes the correction dialog without recording anything.
+function cancelPriorityFeedback() {
+  priorityFeedbackTodo.value = null;
+}
+
+/**
+ * Persists the correction and closes the dialog.
+ */
+async function confirmPriorityFeedback() {
+  const todo = priorityFeedbackTodo.value;
+  if (!todo) return;
+  try {
+    await createPriorityCorrection(todo.title, todo.priority, correctedPriority.value, todo.category);
+    showToast(new Toast('Success', 'Thanks! The corrected priority was recorded.', 'success'));
+  } catch (error) {
+    console.error('Error recording priority correction:', error);
+    const message = error instanceof Error ? error.message : String(error);
+    showToast(new Toast('Error', `Failed to record correction: ${message}`, 'error'));
+  } finally {
+    priorityFeedbackTodo.value = null;
+  }
+}
+
 // Downloads all todos as a CSV file via the backend CSV endpoint.
 async function handleDownloadCsv() {
   isDownloadingCsv.value = true;
@@ -231,6 +273,7 @@ onMounted(fetchTodos);
           @toggle-finished="handleToggleFinished"
           @edit="handleEdit"
           @delete="requestDelete"
+          @report-priority="openPriorityFeedback"
         />
       </section>
 
@@ -243,6 +286,27 @@ onMounted(fetchTodos);
           @delete="requestDelete"
         />
       </section>
+    </div>
+
+    <!-- Priority-correction dialog opened from the thumbs-down control -->
+    <div v-if="priorityFeedbackTodo" class="modal-overlay" @click.self="cancelPriorityFeedback">
+      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="priority-feedback-title">
+        <h3 id="priority-feedback-title" class="modal-title">Wrong priority?</h3>
+        <p class="modal-text">
+          The system predicted <strong>{{ priorityFeedbackTodo.priority }}</strong> for
+          "{{ priorityFeedbackTodo.title }}". What should it be?
+        </p>
+        <div class="filter-group">
+          <label for="corrected-priority">Correct priority:</label>
+          <select id="corrected-priority" v-model="correctedPriority" class="sort-select">
+            <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <Button mode="secondary" @click="cancelPriorityFeedback">Cancel</Button>
+          <Button mode="primary" @click="confirmPriorityFeedback">Send feedback</Button>
+        </div>
+      </div>
     </div>
 
     <!-- In-app delete confirmation dialog (replaces native confirm()) -->

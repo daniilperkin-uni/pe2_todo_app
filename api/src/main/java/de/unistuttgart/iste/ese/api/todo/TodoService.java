@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final AssigneeRepository assigneeRepository;
     private final TodoClassifier todoClassifier;
+    private final PriorityCorrectionRepository priorityCorrectionRepository;
 
     /**
      * Constructor for dependency injection.
@@ -38,11 +40,14 @@ public class TodoService {
      * @param todoRepository     repository for todo persistence
      * @param assigneeRepository repository for assignee persistence
      * @param todoClassifier     ML-based title classifier used to derive the category
+     * @param priorityCorrectionRepository repository for classifier feedback rows
      */
-    public TodoService(TodoRepository todoRepository, AssigneeRepository assigneeRepository, TodoClassifier todoClassifier) {
+    public TodoService(TodoRepository todoRepository, AssigneeRepository assigneeRepository,
+                       TodoClassifier todoClassifier, PriorityCorrectionRepository priorityCorrectionRepository) {
         this.todoRepository = todoRepository;
         this.assigneeRepository = assigneeRepository;
         this.todoClassifier = todoClassifier;
+        this.priorityCorrectionRepository = priorityCorrectionRepository;
     }
 
     /**
@@ -351,6 +356,69 @@ public class TodoService {
             .sorted(java.util.Comparator.comparingLong(TodoStatsDTO.AssigneeCount::getCount).reversed())
             .collect(Collectors.toList()));
 
+        return stats;
+    }
+
+    /**
+     * Persists a priority correction recorded through classifier feedback.
+     *
+     * <p>Both priorities are validated against {@link Priority}; a correction
+     * naming an unknown value is rejected with {@code 400}.
+     *
+     * @param correctionDTO the correction data
+     * @return the persisted {@link PriorityCorrection}
+     * @throws ResponseStatusException with status {@code 400} when either
+     *     priority is not one of LOW, MEDIUM, HIGH
+     */
+    public PriorityCorrection recordPriorityCorrection(de.unistuttgart.iste.ese.api.todo.dto.PriorityCorrectionCreateDTO correctionDTO) {
+        String predicted = validatePriorityName(correctionDTO.getPredictedPriority(), "predicted");
+        String corrected = validatePriorityName(correctionDTO.getCorrectedPriority(), "corrected");
+
+        PriorityCorrection correction = new PriorityCorrection();
+        correction.setTodoTitle(correctionDTO.getTodoTitle());
+        correction.setPredictedPriority(predicted);
+        correction.setCorrectedPriority(corrected);
+        correction.setCategory(correctionDTO.getCategory());
+        return priorityCorrectionRepository.save(correction);
+    }
+
+    /**
+     * Validates that the given name is a known {@link Priority}.
+     *
+     * @param name  the raw priority string from the request
+     * @param which label used in the error message ("predicted" or "corrected")
+     * @return the normalized (upper-case) priority name
+     * @throws ResponseStatusException with status {@code 400} when unknown
+     */
+    private String validatePriorityName(String name, String which) {
+        try {
+            return Priority.valueOf(name.toUpperCase()).name();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid " + which + " priority. Must be LOW, MEDIUM, or HIGH.");
+        }
+    }
+
+    /**
+     * Aggregates the recorded corrections: total count, counts per
+     * predicted-to-corrected transition and per corrected target priority.
+     *
+     * @return the aggregated statistics; never {@code null}
+     */
+    @Transactional(readOnly = true)
+    public PriorityCorrectionStatsDTO getPriorityCorrectionStats() {
+        List<PriorityCorrection> all = priorityCorrectionRepository.findAll();
+        PriorityCorrectionStatsDTO stats = new PriorityCorrectionStatsDTO();
+        stats.setTotalCorrections(all.size());
+
+        Map<String, Long> transitions = new java.util.TreeMap<>();
+        Map<String, Long> perPriority = new java.util.TreeMap<>();
+        for (PriorityCorrection c : all) {
+            transitions.merge(c.getPredictedPriority() + "->" + c.getCorrectedPriority(), 1L, Long::sum);
+            perPriority.merge(c.getCorrectedPriority(), 1L, Long::sum);
+        }
+        stats.setTransitions(transitions);
+        stats.setCorrectionsPerPriority(perPriority);
         return stats;
     }
 

@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { TodoStats } from '@/types/todoStats';
-import { getTodoStats } from '@/services/apiService';
+import { getTodoStats, getPriorityCorrectionStats } from '@/services/apiService';
+import type { PriorityCorrectionStats } from '@/types/priorityCorrections';
 import { showToast, Toast } from '@/ts/toasts';
 import { Button } from 'agnostic-vue';
 
 const stats = ref<TodoStats | null>(null);
+const correctionStats = ref<PriorityCorrectionStats | null>(null);
 const isLoading = ref<boolean>(true);
 
 // Fixed palette for the category pie slices; keys are assigned in insertion
@@ -71,7 +73,14 @@ const pieSlices = computed(() => {
 async function fetchStats() {
   isLoading.value = true;
   try {
-    stats.value = await getTodoStats();
+    const [todoStats, corrections] = await Promise.all([
+      getTodoStats(),
+      getPriorityCorrectionStats().catch(() => null),
+    ]);
+    stats.value = todoStats;
+    // Corrections stats are a nice-to-have; a failure there must not blank
+    // out the whole page, hence the swallowed rejection above.
+    correctionStats.value = corrections;
   } catch (error) {
     console.error('Error fetching todo stats:', error);
     showToast(new Toast('Error', 'Failed to load statistics.', 'error'));
@@ -208,6 +217,30 @@ onMounted(fetchStats);
             </li>
           </ul>
         </section>
+        <!-- Classifier feedback: priority corrections -->
+        <section class="card chart-card">
+          <h2 class="chart-title">Priority Corrections (Classifier Feedback)</h2>
+          <template v-if="correctionStats && correctionStats.totalCorrections > 0">
+            <p class="corrections-total">
+              {{ correctionStats.totalCorrections }} correction{{ correctionStats.totalCorrections === 1 ? '' : 's' }} recorded
+            </p>
+            <table class="corrections-table">
+              <thead>
+                <tr><th>Predicted → Corrected</th><th>Count</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="(count, transition) in correctionStats.transitions" :key="transition">
+                  <td>{{ transition.replace('->', ' → ') }}</td>
+                  <td>{{ count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </template>
+          <p v-else class="chart-empty">
+            No corrections recorded yet. Use the thumbs-down on a todo card to tell us
+            when the predicted priority is wrong.
+          </p>
+        </section>
       </div>
     </template>
   </div>
@@ -325,5 +358,26 @@ onMounted(fetchStats);
   height: 12px;
   border-radius: 2px;
   margin-right: 6px;
+}
+
+.corrections-total {
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+.corrections-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.corrections-table th,
+.corrections-table td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-sm);
+  text-align: left;
+}
+
+.corrections-table th {
+  background-color: var(--color-surface-alt);
 }
 </style>

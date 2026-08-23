@@ -7,7 +7,7 @@ defineProps<{
   todos: Todo[];
 }>();
 
-const emit = defineEmits(['toggle-finished', 'edit', 'delete']);
+const emit = defineEmits(['toggle-finished', 'edit', 'delete', 'report-priority']);
 
 function handleToggleFinished(id: number, finished: boolean) {
   emit('toggle-finished', id, finished);
@@ -19,6 +19,10 @@ function handleEdit(id: number) {
 
 function handleDelete(id: number) {
   emit('delete', id);
+}
+
+function handleReportPriority(todo: Todo) {
+  emit('report-priority', todo);
 }
 </script>
 
@@ -35,6 +39,7 @@ function handleDelete(id: number) {
         @toggle-finished="handleToggleFinished"
         @edit="handleEdit"
         @delete="handleDelete"
+        @report-priority="handleReportPriority"
       />
     </div>
   </div>

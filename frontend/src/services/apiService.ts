@@ -1,6 +1,7 @@
 import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee';
-import type { Todo, TodoCreateUpdate, TodoStatus } from '@/types/todo';
+import type { Todo, TodoCreateUpdate, TodoStatus, Priority } from '@/types/todo';
 import type { TodoStats } from '@/types/todoStats';
+import type { PriorityCorrectionStats } from '@/types/priorityCorrections';
 
 const API_BASE_URL = '/api/v1';
 
@@ -216,6 +217,47 @@ export async function deleteTodo(id: number): Promise<void> {
 export async function getTodoStats(): Promise<TodoStats> {
   const response = await fetch(`${API_BASE_URL}/todos/stats`);
   return await handleResponse<TodoStats>(response);
+}
+
+/**
+ * Records a priority correction from classifier feedback (thumbs-down).
+ *
+ * @param todoTitle - the title of the todo the prediction was made for
+ * @param predictedPriority - the priority the system had assigned
+ * @param correctedPriority - the priority the user says is correct
+ * @param category - optional category of the todo at correction time
+ * @throws {Error} when the request fails or validation fails on the backend
+ */
+export async function createPriorityCorrection(
+  todoTitle: string,
+  predictedPriority: Priority,
+  correctedPriority: Priority,
+  category?: string | null,
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/todos/priority-corrections`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      todoTitle,
+      predictedPriority,
+      correctedPriority,
+      category: category ?? null,
+    }),
+  });
+  await handleResponse<unknown>(response);
+}
+
+/**
+ * Fetches aggregated priority-correction statistics.
+ *
+ * @returns total corrections plus counts per transition and per target priority
+ * @throws {Error} when the request fails or the backend returns a non-ok status
+ */
+export async function getPriorityCorrectionStats(): Promise<PriorityCorrectionStats> {
+  const response = await fetch(`${API_BASE_URL}/todos/priority-corrections/stats`);
+  return await handleResponse<PriorityCorrectionStats>(response);
 }
 
 // --- CSV Download API Calls ---
