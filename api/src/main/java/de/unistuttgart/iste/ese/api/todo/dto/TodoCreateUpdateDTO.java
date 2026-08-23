@@ -13,6 +13,7 @@ public class TodoCreateUpdateDTO {
     private String description;
     private boolean finished;
     private String priority; // Als String, da JSON Enums nicht direkt kennt
+    private String status; // Optional: OPEN, IN_PROGRESS oder DONE
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
@@ -75,6 +76,20 @@ public class TodoCreateUpdateDTO {
      */
     public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    /**
+     * Gibt den optionalen Workflow-Status des Todos zurück
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * Setzt den optionalen Workflow-Status des Todos
+     */
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     /**

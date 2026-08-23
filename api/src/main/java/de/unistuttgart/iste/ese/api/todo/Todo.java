@@ -36,6 +36,11 @@ public class Todo {
     @Enumerated(EnumType.STRING)
     private Priority priority;
 
+    // Workflow-Status der Todo auf dem Kanban-Board
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'OPEN'")
+    private TodoStatus status = TodoStatus.OPEN;
+
     // Erstellungsdatum der Todo
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(nullable = false)
@@ -145,6 +150,20 @@ public class Todo {
      */
     public void setPriority(Priority priority) {
         this.priority = priority;
+    }
+
+    /**
+     * Gibt den Workflow-Status des Todos zurück
+     */
+    public TodoStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Setzt den Workflow-Status des Todos
+     */
+    public void setStatus(TodoStatus status) {
+        this.status = (status != null) ? status : TodoStatus.OPEN;
     }
 
     /**

@@ -12,6 +12,7 @@ public class TodoDTO {
     private String description;
     private boolean finished;
     private String priority;
+    private String status;
     private List<AssigneeDTO> assigneeList;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdDate;
@@ -91,6 +92,20 @@ public class TodoDTO {
      */
     public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    /**
+     * Gibt den Workflow-Status des Todos zurück
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * Setzt den Workflow-Status des Todos
+     */
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     /**
