@@ -14,6 +14,7 @@ public class TodoCreateUpdateDTO {
     private boolean finished;
     private String priority; // Als String, da JSON Enums nicht direkt kennt
     private String status; // Optional: OPEN, IN_PROGRESS oder DONE
+    private String recurrenceRule; // Optional: NONE, WEEKLY, MONTHLY
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
@@ -90,6 +91,20 @@ public class TodoCreateUpdateDTO {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /**
+     * Gibt die optionale Wiederholungsregel des Todos zurück
+     */
+    public String getRecurrenceRule() {
+        return recurrenceRule;
+    }
+
+    /**
+     * Setzt die optionale Wiederholungsregel des Todos
+     */
+    public void setRecurrenceRule(String recurrenceRule) {
+        this.recurrenceRule = recurrenceRule;
     }
 
     /**

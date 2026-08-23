@@ -21,6 +21,9 @@ public class TodoDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate finishedDate;
     private String category;
+    private String recurrenceRule;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private java.time.LocalDate nextOccurrenceDate;
 
     // Getter und Setter
 
@@ -176,5 +179,33 @@ public class TodoDTO {
      */
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    /**
+     * Gibt die Wiederholungsregel des Todos zurück
+     */
+    public String getRecurrenceRule() {
+        return recurrenceRule;
+    }
+
+    /**
+     * Setzt die Wiederholungsregel des Todos
+     */
+    public void setRecurrenceRule(String recurrenceRule) {
+        this.recurrenceRule = recurrenceRule;
+    }
+
+    /**
+     * Gibt das Fälligkeitsdatum der nächsten Instanz zurück
+     */
+    public java.time.LocalDate getNextOccurrenceDate() {
+        return nextOccurrenceDate;
+    }
+
+    /**
+     * Setzt das Fälligkeitsdatum der nächsten Instanz
+     */
+    public void setNextOccurrenceDate(java.time.LocalDate nextOccurrenceDate) {
+        this.nextOccurrenceDate = nextOccurrenceDate;
     }
 }

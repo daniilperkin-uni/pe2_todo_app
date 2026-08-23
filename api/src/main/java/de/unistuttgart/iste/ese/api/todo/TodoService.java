@@ -69,6 +69,8 @@ public class TodoService {
         dto.setDueDate(todo.getDueDate());
         dto.setFinishedDate(todo.getFinishedDate());
         dto.setCategory(todo.getCategory());
+        dto.setRecurrenceRule(todo.getRecurrenceRule().name());
+        dto.setNextOccurrenceDate(todo.getNextOccurrenceDate());
 
         List<AssigneeDTO> assigneeDTOs = todo.getAssigneeList().stream()
             .map(assignee -> {
@@ -119,6 +121,16 @@ public class TodoService {
             } catch (IllegalArgumentException e) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Invalid status value. Must be OPEN, IN_PROGRESS, or DONE.");
+            }
+        }
+
+        // Parse the recurrence rule from the DTO (additive: null defaults to NONE)
+        if (dto.getRecurrenceRule() != null) {
+            try {
+                todo.setRecurrenceRule(RecurrenceRule.valueOf(dto.getRecurrenceRule().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid recurrence rule. Must be NONE, WEEKLY, or MONTHLY.");
             }
         }
 
@@ -235,7 +247,11 @@ public class TodoService {
         Todo existingTodo = todoRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found with id " + id));
         Todo updatedTodo = convertToEntity(todoDTO, existingTodo);
+        boolean justFinished = !existingTodo.isFinished() && updatedTodo.isFinished();
         Todo savedTodo = todoRepository.save(updatedTodo);
+        if (justFinished) {
+            spawnNextRecurrence(savedTodo);
+        }
         return convertToDTO(savedTodo);
     }
 
@@ -279,6 +295,10 @@ public class TodoService {
 
         todo.setStatus(newStatus);
         Todo savedTodo = todoRepository.save(todo);
+        // Finishing via the kanban board also spawns the next recurrence.
+        if (newStatus == TodoStatus.DONE) {
+            spawnNextRecurrence(savedTodo);
+        }
         return convertToDTO(savedTodo);
     }
 
@@ -420,6 +440,62 @@ public class TodoService {
         stats.setTransitions(transitions);
         stats.setCorrectionsPerPriority(perPriority);
         return stats;
+    }
+
+    /**
+     * Computes the due date of the next occurrence after the given base date.
+     *
+     * <p>WEEKLY adds seven days. MONTHLY adds one month with month-end
+     * rollover: Jan 31 -> Feb 28 (or 29), because {@link LocalDate#plusMonths}
+     * clamps to the last valid day of the target month.
+     *
+     * @param rule  the recurrence cadence; must not be {@code null}
+     * @param after the date the next occurrence is computed from
+     * @return the next occurrence date, or {@code null} when the rule is NONE
+     */
+    static LocalDate computeNextOccurrence(RecurrenceRule rule, LocalDate after) {
+        return switch (rule) {
+            case WEEKLY -> after.plusWeeks(1);
+            case MONTHLY -> after.plusMonths(1);
+            case NONE -> null;
+        };
+    }
+
+    /**
+     * Spawns the next instance when a recurring todo is finished.
+     *
+     * <p>The finished todo keeps its finished state; a fresh copy with the
+     * same title, description, priority, assignees, category and recurrence
+     * rule is created with dueDate = nextOccurrenceDate and finished = false.
+     * Non-recurring todos produce no successor.
+     *
+     * @param finishedTodo the todo that was just marked finished; must not be {@code null}
+     */
+    private void spawnNextRecurrence(Todo finishedTodo) {
+        if (finishedTodo.getRecurrenceRule() == null || finishedTodo.getRecurrenceRule() == RecurrenceRule.NONE) {
+            return;
+        }
+        LocalDate baseDate = finishedTodo.getNextOccurrenceDate() != null
+            ? finishedTodo.getNextOccurrenceDate()
+            : finishedTodo.getDueDate();
+        if (baseDate == null) {
+            // Nothing to anchor the next occurrence to; skip silently rather
+            // than fail the finishing operation.
+            return;
+        }
+
+        LocalDate nextDue = computeNextOccurrence(finishedTodo.getRecurrenceRule(), baseDate);
+        Todo next = new Todo();
+        next.setTitle(finishedTodo.getTitle());
+        next.setDescription(finishedTodo.getDescription());
+        next.setPriority(finishedTodo.getPriority());
+        next.setRecurrenceRule(finishedTodo.getRecurrenceRule());
+        next.setNextOccurrenceDate(nextDue);
+        next.setDueDate(nextDue);
+        next.setAssigneeList(finishedTodo.getAssigneeList());
+        next.setCategory(finishedTodo.getCategory());
+        next.setStatus(TodoStatus.OPEN);
+        todoRepository.save(next);
     }
 
     /**

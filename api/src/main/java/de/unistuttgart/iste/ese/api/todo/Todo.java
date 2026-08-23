@@ -66,6 +66,15 @@ public class Todo {
     // Kategorie der Todo (z.B. "work", "private")
     private String category;
 
+    // Wiederholungsregel der Todo (NONE, WEEKLY, MONTHLY)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(10) default 'NONE'")
+    private RecurrenceRule recurrenceRule = RecurrenceRule.NONE;
+
+    // Fälligkeitsdatum der nächsten wiederkehrenden Instanz
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate nextOccurrenceDate;
+
     /**
      * Setzt das Erstellungsdatum vor dem Speichern
      */
@@ -242,5 +251,33 @@ public class Todo {
      */
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    /**
+     * Gibt die Wiederholungsregel des Todos zurück
+     */
+    public RecurrenceRule getRecurrenceRule() {
+        return recurrenceRule;
+    }
+
+    /**
+     * Setzt die Wiederholungsregel des Todos
+     */
+    public void setRecurrenceRule(RecurrenceRule recurrenceRule) {
+        this.recurrenceRule = (recurrenceRule != null) ? recurrenceRule : RecurrenceRule.NONE;
+    }
+
+    /**
+     * Gibt das Fälligkeitsdatum der nächsten Instanz zurück
+     */
+    public LocalDate getNextOccurrenceDate() {
+        return nextOccurrenceDate;
+    }
+
+    /**
+     * Setzt das Fälligkeitsdatum der nächsten Instanz
+     */
+    public void setNextOccurrenceDate(LocalDate nextOccurrenceDate) {
+        this.nextOccurrenceDate = nextOccurrenceDate;
     }
 }
