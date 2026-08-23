@@ -35,7 +35,8 @@ class TodoStatsServiceTest {
         todoRepository = mock(TodoRepository.class);
         assigneeRepository = mock(AssigneeRepository.class);
         todoClassifier = new TodoClassifier();
-        todoService = new TodoService(todoRepository, assigneeRepository, todoClassifier);
+        todoService = new TodoService(todoRepository, assigneeRepository, todoClassifier,
+            mock(PriorityCorrectionRepository.class));
     }
 
     private Todo todo(String title, Priority priority, boolean finished,
