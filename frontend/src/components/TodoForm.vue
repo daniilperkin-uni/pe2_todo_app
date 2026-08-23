@@ -19,6 +19,7 @@ const todoForm = ref<TodoCreateUpdate>({
   priority: 'LOW', // Default priority
   dueDate: '',
   assigneeIdList: [],
+  recurrenceRule: 'NONE',
 });
 
 const availableAssignees = ref<Assignee[]>([]);
@@ -50,6 +51,7 @@ watchEffect(() => {
       priority: props.initialTodo.priority,
       dueDate: props.initialTodo.dueDate,
       assigneeIdList: props.initialTodo.assigneeList?.map((a) => a.id) || [],
+      recurrenceRule: props.initialTodo.recurrenceRule ?? 'NONE',
     };
   }
 });
@@ -118,6 +120,19 @@ onMounted(fetchAssignees);
       <select id="priority" v-model="todoForm.priority">
         <option v-for="p in priorities" :key="p" :value="p">{{ p }}</option>
       </select>
+    </div>
+
+    <div class="form-group">
+      <label for="recurrence">Repeat:</label>
+      <select id="recurrence" v-model="todoForm.recurrenceRule">
+        <option value="NONE">No repetition</option>
+        <option value="WEEKLY">Weekly</option>
+        <option value="MONTHLY">Monthly</option>
+      </select>
+      <small class="form-hint">
+        Recurring todos create a fresh copy when finished, due on the next occurrence.
+        Month-end dates roll over (Jan 31 → Feb 28).
+      </small>
     </div>
 
     <div class="form-group">

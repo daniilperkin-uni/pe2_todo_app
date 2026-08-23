@@ -23,6 +23,7 @@ function makeTodo(overrides: Partial<Todo> = {}): Todo {
     createdDate: '2024-06-01',
     dueDate: '2024-06-12',
     finishedDate: '',
+    recurrenceRule: 'NONE',
     ...overrides,
   }
 }

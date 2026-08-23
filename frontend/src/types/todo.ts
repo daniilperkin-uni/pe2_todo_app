@@ -4,6 +4,8 @@ export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export type TodoStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE';
 
+export type RecurrenceRule = 'NONE' | 'WEEKLY' | 'MONTHLY';
+
 export interface Todo {
     id: number;
     title: string;
@@ -16,6 +18,8 @@ export interface Todo {
     dueDate: string;     // ISO-8601 date string (yyyy-MM-dd)
     finishedDate: string; // ISO-8601 date string (yyyy-MM-dd)
     category?: string | null;
+    recurrenceRule: RecurrenceRule;
+    nextOccurrenceDate?: string | null;
 }
 
 export interface TodoCreateUpdate {
@@ -25,4 +29,5 @@ export interface TodoCreateUpdate {
     priority: Priority;
     dueDate: string; // ISO-8601 date string (yyyy-MM-dd)
     assigneeIdList: number[]; // List of Assignee IDs
+    recurrenceRule?: RecurrenceRule;
 }
