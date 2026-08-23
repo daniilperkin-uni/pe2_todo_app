@@ -13,6 +13,9 @@ const router = useRouter();
 const todos = ref<Todo[]>([]);
 const isLoading = ref<boolean>(true);
 const isDownloadingCsv = ref<boolean>(false);
+// Which representation of the todo list the toggle button links to. The
+// TodosView itself always renders the list; the button switches to the board.
+const viewMode = computed(() => (router.currentRoute.value.path === '/board' ? 'board' : 'list'));
 // Identifier of the todo pending deletion confirmation, or null when the
 // confirmation dialog is closed. Replaces the blocking native confirm() call.
 const todoToDelete = ref<number | null>(null);
@@ -171,6 +174,12 @@ onMounted(fetchTodos);
     <div class="view-header">
       <h1 class="heading">Todos</h1>
       <div class="controls">
+        <Button
+          mode="secondary"
+          @click="router.push(viewMode === 'list' ? '/board' : '/todos')"
+        >
+          {{ viewMode === 'list' ? 'Board View' : 'List View' }}
+        </Button>
         <Button mode="secondary" @click="handleDownloadCsv" :disabled="isDownloadingCsv">
           {{ isDownloadingCsv ? 'Downloading...' : 'Download CSV' }}
         </Button>

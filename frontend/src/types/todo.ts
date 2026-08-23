@@ -2,12 +2,15 @@ import type { Assignee } from './assignee'; // Add this line
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 
+export type TodoStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE';
+
 export interface Todo {
     id: number;
     title: string;
     description: string;
     finished: boolean;
     priority: Priority;
+    status: TodoStatus;
     assigneeList: Assignee[];
     createdDate: string; // ISO-8601 date string (yyyy-MM-dd)
     dueDate: string;     // ISO-8601 date string (yyyy-MM-dd)

@@ -31,6 +31,11 @@ const router = createRouter({
       component: () => import('../views/TodosView.vue')
     },
     {
+      path: '/board',
+      name: 'board',
+      component: () => import('../views/BoardView.vue')
+    },
+    {
       path: '/todos/create',
       name: 'create-todo',
       component: () => import('../views/CreateUpdateTodoView.vue')

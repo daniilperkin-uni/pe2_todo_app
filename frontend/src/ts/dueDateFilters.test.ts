@@ -18,6 +18,7 @@ function makeTodo(overrides: Partial<Todo> = {}): Todo {
     description: '',
     finished: false,
     priority: 'MEDIUM',
+    status: 'OPEN',
     assigneeList: [],
     createdDate: '2024-06-01',
     dueDate: '2024-06-12',

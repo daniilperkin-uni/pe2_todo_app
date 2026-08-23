@@ -1,5 +1,5 @@
 import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee';
-import type { Todo, TodoCreateUpdate } from '@/types/todo';
+import type { Todo, TodoCreateUpdate, TodoStatus } from '@/types/todo';
 
 const API_BASE_URL = '/api/v1';
 
@@ -166,6 +166,25 @@ export async function updateTodo(id: number, todo: TodoCreateUpdate): Promise<To
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(todo),
+  });
+  return await handleResponse<Todo>(response);
+}
+
+/**
+ * Transitions a todo to a new Kanban workflow status.
+ *
+ * @param id - the identifier of the todo to transition
+ * @param status - the target workflow status (OPEN, IN_PROGRESS or DONE)
+ * @returns the updated todo
+ * @throws {Error} when the request fails, the todo does not exist or the status is invalid
+ */
+export async function transitionTodoStatus(id: number, status: TodoStatus): Promise<Todo> {
+  const response = await fetch(`${API_BASE_URL}/todos/${id}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(status),
   });
   return await handleResponse<Todo>(response);
 }
