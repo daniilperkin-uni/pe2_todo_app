@@ -85,4 +85,20 @@ public class TodoController {
         todoService.deleteTodo(id);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * Transitions a todo to a new Kanban workflow status.
+     *
+     * <p>The body contains the target {@code status} (OPEN, IN_PROGRESS or DONE).
+     * When the new status is DONE the {@code finished} flag is set and
+     * {@code finishedDate} populated; transitioning away from DONE clears them.
+     *
+     * @param id     the identifier of the todo to transition
+     * @param status the new workflow status ({@code TodoStatus})
+     * @return the updated todo as DTO
+     */
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<TodoDTO> transitionStatus(@PathVariable Long id, @RequestBody TodoStatus status) {
+        return ResponseEntity.ok(todoService.transitionTodoStatus(id, status.name()));
+    }
 }

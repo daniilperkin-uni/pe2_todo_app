@@ -43,6 +43,7 @@ import static de.unistuttgart.iste.ese.api.controller.TestUtil.testAssigneeReq;
 import static de.unistuttgart.iste.ese.api.controller.TestUtil.testTodoReq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -217,6 +218,74 @@ public class TodoControllerTest {
     @DisplayName("delete for non-existing todo fails (404)")
     public void deleteNonExistingTodo() throws Exception {
         mockMvc.perform(delete("/api/v1/todos/{id}", new Random().nextLong(0, Long.MAX_VALUE))).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("transition todo status to IN_PROGRESS (200) sets finished=false")
+    public void transitionStatusToInProgress() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"IN_PROGRESS\""))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
+               .andExpect(jsonPath("$.finished").value(false));
+    }
+
+    @Test
+    @DisplayName("transition todo status to DONE (200) sets finished=true and finishedDate")
+    public void transitionStatusToDone() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"DONE\""))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.status").value("DONE"))
+               .andExpect(jsonPath("$.finished").value(true))
+               .andExpect(jsonPath("$.finishedDate").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("transition todo status to OPEN from DONE clears finished and finishedDate")
+    public void transitionStatusFromDoneToOpen() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        // First move to DONE
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"DONE\""))
+               .andExpect(status().isOk());
+
+        // Then re-open by moving back to OPEN
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"OPEN\""))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.status").value("OPEN"))
+               .andExpect(jsonPath("$.finished").value(false))
+               .andExpect(jsonPath("$.finishedDate").value(org.hamcrest.Matchers.nullValue()));
+    }
+
+    @Test
+    @DisplayName("transition status for non-existing todo fails (404)")
+    public void transitionStatusNonExistingTodo() throws Exception {
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", new Random().nextLong(0, Long.MAX_VALUE))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"DONE\""))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("transition status with invalid status value fails (400)")
+    public void transitionStatusInvalidValue() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"INVALID\""))
+               .andExpect(status().isBadRequest());
     }
 
     private JSONObject createAssignee(JSONObject testAssignee, ResultMatcher... resultMatchers) throws Exception {

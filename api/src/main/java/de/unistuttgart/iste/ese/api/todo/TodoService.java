@@ -58,6 +58,7 @@ public class TodoService {
         dto.setDescription(todo.getDescription());
         dto.setFinished(todo.isFinished());
         dto.setPriority(todo.getPriority().name());
+        dto.setStatus(todo.getStatus().name());
         dto.setCreatedDate(todo.getCreatedDate());
         dto.setDueDate(todo.getDueDate());
         dto.setFinishedDate(todo.getFinishedDate());
@@ -102,6 +103,17 @@ public class TodoService {
             todo.setPriority(Priority.valueOf(dto.getPriority().toUpperCase()));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid priority value. Must be LOW, MEDIUM, or HIGH.");
+        }
+
+        // Parse the workflow status from the DTO (additive: null defaults to OPEN)
+        if (dto.getStatus() != null) {
+            try {
+                TodoStatus status = TodoStatus.valueOf(dto.getStatus().toUpperCase());
+                todo.setStatus(status);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid status value. Must be OPEN, IN_PROGRESS, or DONE.");
+            }
         }
 
         // Handle finished-state transitions for updates (existing todo)
@@ -219,6 +231,69 @@ public class TodoService {
         Todo updatedTodo = convertToEntity(todoDTO, existingTodo);
         Todo savedTodo = todoRepository.save(updatedTodo);
         return convertToDTO(savedTodo);
+    }
+
+    /**
+     * Transitions a todo to a new workflow status.
+     *
+     * <p>Valid Kanban workflow transitions are defined by the order in
+     * {@link TodoStatus}: OPEN → IN_PROGRESS → DONE. A todo may move to any
+     * earlier state (re-opening). Moving to DONE sets the finished flag and
+     * finishedDate; moving away from DONE clears them. Moving to OPEN or
+     * IN_PROGRESS clears them.
+     *
+     * @param id     the identifier of the todo to update
+     * @param status the new workflow status
+     * @return the updated todo as DTO
+     * @throws ResponseStatusException with status {@code 404} when the todo does not exist,
+     *     or {@code 400} when the status string is not a valid TodoStatus value
+     */
+    public TodoDTO transitionTodoStatus(Long id, String status) {
+        TodoStatus newStatus;
+        try {
+            newStatus = TodoStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid status value. Must be OPEN, IN_PROGRESS, or DONE.");
+        }
+
+        Todo todo = todoRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found with id " + id));
+
+        // Synchronize the finished flag with the DONE status
+        if (newStatus == TodoStatus.DONE) {
+            todo.setFinished(true);
+            if (todo.getFinishedDate() == null) {
+                todo.setFinishedDate(LocalDate.now());
+            }
+        } else {
+            todo.setFinished(false);
+            todo.setFinishedDate(null);
+        }
+
+        todo.setStatus(newStatus);
+        Todo savedTodo = todoRepository.save(todo);
+        return convertToDTO(savedTodo);
+    }
+
+    /**
+     * Returns todos grouped and counted by status for the kanban board.
+     *
+     * @return a map from status name to the list of todo DTOs in that column
+     */
+    @Transactional(readOnly = true)
+    public java.util.Map<TodoStatus, List<TodoDTO>> getTodosByStatus() {
+        java.util.Map<TodoStatus, List<TodoDTO>> result = new java.util.EnumMap<>(TodoStatus.class);
+        for (TodoStatus s : TodoStatus.values()) {
+            result.put(s, List.of());
+        }
+        java.util.Map<TodoStatus, List<TodoDTO>> grouped = todoRepository.findAll().stream()
+            .collect(Collectors.groupingBy(
+                Todo::getStatus,
+                java.util.stream.Collectors.mapping(this::convertToDTO, Collectors.toList())
+            ));
+        result.putAll(grouped);
+        return result;
     }
 
     /**
