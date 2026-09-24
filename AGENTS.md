@@ -1,6 +1,6 @@
 # AGENTS.md — pe2_todo_app
 
-Fullstack Todo application: Spring Boot 3.2.5 REST API + Vue 3/TypeScript frontend, Docker Compose.
+Fullstack Todo application: Spring Boot 4.1.1 REST API + Vue 3/TypeScript frontend, Docker Compose.
 
 ## Build & Run
 
@@ -35,7 +35,7 @@ Vite dev server runs on <http://localhost:5173>.
 
 ```bash
 # Backend
-cd api && ./mvnw clean test
+cd api && ./mvnw clean test   # ./mvnw verify adds Checkstyle + JaCoCo >= 80 % (as in CI)
 
 # Frontend
 cd frontend && npm run test
@@ -43,7 +43,7 @@ cd frontend && npm run test
 
 ## Architecture
 
-### Backend (Spring Boot 3.2.5, Java 21)
+### Backend (Spring Boot 4.1.1, Java 21)
 
 - **Layering:** `Controller → Service → Repository`
 - `TodoController` / `AssigneeController` — thin HTTP wiring, DTO conversion only
@@ -51,12 +51,13 @@ cd frontend && npm run test
 - `TodoRepository` / `AssigneeRepository` — Spring Data JPA
 - `GlobalExceptionHandler` — `@RestControllerAdvice`, RFC 7807 ProblemDetail
 - `TodoClassifier` — JPMML-based ML priority classifier
-- DTOs: `TodoDTO`, `TodoCreateUpdateDTO`, `AssigneeDTO`, `AssigneeCreateUpdateDTO` (Bean Validation)
+- DTOs: `TodoDTO`, `TodoCreateUpdateDTO`, `AssigneeDTO`, `AssigneeCreateUpdateDTO`, `TodoStatsDTO`, `PriorityCorrection*DTO` (Bean Validation)
+- Also: `CsvDownloadController`, `PriorityCorrectionController`
 
 ### Frontend (Vue 3.5, TypeScript 5.9, Vite 7)
 
-- `views/` — page-level components (TodosView, CreateUpdateTodoView, AssigneesView)
-- `components/` — reusable components (TodoList, TodoItem, TodoForm, AssigneeList)
+- `views/` — page-level components (TodosView, CreateUpdateTodoView, BoardView, TodoStatsView, AssigneesView, AssigneeDetailsView, CreateAssigneeView)
+- `components/` — reusable components (TodoList, TodoItem, TodoForm, AssigneeList, AssigneeForm)
 - `services/apiService.ts` — centralized API client
 - `types/` — TypeScript interfaces mirroring backend DTOs
 - `router/` — Vue Router configuration
@@ -64,7 +65,7 @@ cd frontend && npm run test
 ### Database
 
 - MariaDB via Docker Compose
-- `spring.jpa.hibernate.ddl-auto=update` (dev), `validate` (prod)
+- `spring.jpa.hibernate.ddl-auto=update` (application.properties and Docker Compose; no separate prod profile)
 - Credentials via environment variables (see `.env.example`)
 
 ## Rules
