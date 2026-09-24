@@ -1,10 +1,7 @@
 package de.unistuttgart.iste.ese.api.todo;
 
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.Model;
-import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.*;
-import org.jpmml.model.PMMLUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,10 +25,9 @@ public class TodoClassifier {
                 LOGGER.error("model.pmml not found in resources!");
                 return;
             }
-            PMML pmml = PMMLUtil.unmarshal(inputStream);
-            Model model = pmml.getModels().get(0);
-            ModelEvaluatorFactory modelEvaluatorFactory = ModelEvaluatorFactory.newInstance();
-            this.evaluator = modelEvaluatorFactory.newModelEvaluator(pmml, model);
+            this.evaluator = new LoadingModelEvaluatorBuilder()
+                .load(inputStream)
+                .build();
             this.evaluator.verify();
             LOGGER.info("PMML model loaded successfully.");
         } catch (Exception e) {
@@ -64,16 +60,37 @@ public class TodoClassifier {
                 FieldName targetFieldName = targetField.getName();
                 Object targetValue = results.get(targetFieldName);
                 
-                if (targetValue instanceof Computable) {
-                     return ((Computable) targetValue).getResult().toString();
-                } else if (targetValue != null) {
-                     return targetValue.toString();
+                Object label = targetValue instanceof Computable computable
+                    ? computable.getResult() : targetValue;
+                String category = toCategory(label);
+                if (category != null) {
+                    return category;
                 }
             }
             return deterministicFallback(title);
         } catch (Exception e) {
             LOGGER.error("Error during classification", e);
             return deterministicFallback(title);
+        }
+    }
+
+    /**
+     * The model's target field is named "['private' 'work']" and encodes the
+     * class as an integer index into that list.
+     */
+    private static String toCategory(Object label) {
+        if (label == null) {
+            return null;
+        }
+        switch (label.toString()) {
+            case "0":
+            case "private":
+                return "private";
+            case "1":
+            case "work":
+                return "work";
+            default:
+                return null;
         }
     }
 

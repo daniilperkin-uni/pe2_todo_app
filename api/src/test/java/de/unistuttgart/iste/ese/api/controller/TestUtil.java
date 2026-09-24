@@ -16,6 +16,9 @@ public class TestUtil {
     private static final String[] TODO_DESCRIPTIONS = {"Buy milk eggs bread apples and cereal", "Wash dry and fold clothes", "Vacuum dust and mop all rooms", "Give each plant a cup of water", "Give cat half a can of food", "Review notes and practice problems", "Write introduction methods and results", "Ask how she is doing and tell her about your day", "Pay rent electricity and phone bill", "Make spaghetti with meatballs and garlic bread", "Cut grass trim hedges and rake leaves", "Fix leaky faucet in bathroom", "Clean car inside and out", "Pick up kids from school and drive them to soccer practice", "Lift weights run on treadmill and do sit-ups", "Walk dog around the block", "Take out trash cans and recycling bins", "Get haircut at local barber shop", "Book flight to Hawaii for vacation", "Renew passport at post office", "Check mail for letters and packages", "Schedule dentist appointment for next month", "Get oil change at auto repair shop", "Buy gift for friend's birthday", "Return books to library"};
     private static final String[] DEPARTMENT = {"iste", "ipvs", "sec"};
 
+    private static final java.util.concurrent.atomic.AtomicInteger MAIL_COUNTER =
+        new java.util.concurrent.atomic.AtomicInteger();
+
     private TestUtil() {
     }
 
@@ -175,7 +178,9 @@ public class TestUtil {
             JSONObject assignee = new JSONObject();
             assignee.put("prename", prename);
             assignee.put("name", name);
-            assignee.put("email", getRandomMail(prename, name));
+            // Suffix keeps emails unique; the column has a unique constraint and
+            // random name pairs collide often enough to make tests flaky.
+            assignee.put("email", getRandomMail(prename + "." + name + MAIL_COUNTER.incrementAndGet()));
             return assignee;
         } catch (JSONException ex) {
             throw new RuntimeException(ex);
