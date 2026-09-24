@@ -8,35 +8,32 @@ on:
   pull_request:
   merge_group:
   workflow_dispatch:
+
 concurrency:
   group: "${{ github.workflow }}-${{ github.head_ref || github.ref }}"
   cancel-in-progress: true
+
 jobs:
-#  Dislabed - enable, if you are confident in writing linted markdown
-#  lint-md:
-#    runs-on: [self-hosted, linux, ubuntu-latest]
-#    steps:
-#      - name: Set up Git repository
-#        uses: actions/checkout@v4
-#      - name: Lint
-#        uses: DavidAnson/markdownlint-cli2-action@v17
-#        with:
-#          globs: |
-#            **/*.md
-  lint-js:
+  lint-md:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Git repository
-        uses: actions/checkout@v4
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: DavidAnson/markdownlint-cli2-action@v24
+        with:
+          globs: |
+            **/*.md
+            #**/node_modules
+  lint-js:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22.x
-      - name: npm ci
-        run: |
-          cd frontend
-          npm ci
-      - name: npm run lint:ci
-        run: |
-          cd frontend
-          npm run lint:ci
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint:ci

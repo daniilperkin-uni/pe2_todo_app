@@ -5,27 +5,34 @@ Fullstack Todo application: Spring Boot 3.2.5 REST API + Vue 3/TypeScript fronte
 ## Build & Run
 
 ### Docker (recommended)
+
 ```bash
 docker compose up --build
 ```
+
 Starts backend (API), frontend (nginx), and MariaDB.
 
 ### Backend dev
+
 ```bash
 cd api
 ./mvnw spring-boot:run
 ```
+
 Requires MariaDB running on localhost:3306 or use Docker: `docker compose up database`
 
 ### Frontend dev
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Vite dev server runs on http://localhost:5173.
+
+Vite dev server runs on <http://localhost:5173>.
 
 ### Tests
+
 ```bash
 # Backend
 cd api && ./mvnw clean test
@@ -37,6 +44,7 @@ cd frontend && npm run test
 ## Architecture
 
 ### Backend (Spring Boot 3.2.5, Java 21)
+
 - **Layering:** `Controller → Service → Repository`
 - `TodoController` / `AssigneeController` — thin HTTP wiring, DTO conversion only
 - `TodoService` / `AssigneeService` — `@Service`, `@Transactional`, all business logic
@@ -46,6 +54,7 @@ cd frontend && npm run test
 - DTOs: `TodoDTO`, `TodoCreateUpdateDTO`, `AssigneeDTO`, `AssigneeCreateUpdateDTO` (Bean Validation)
 
 ### Frontend (Vue 3.5, TypeScript 5.9, Vite 7)
+
 - `views/` — page-level components (TodosView, CreateUpdateTodoView, AssigneesView)
 - `components/` — reusable components (TodoList, TodoItem, TodoForm, AssigneeList)
 - `services/apiService.ts` — centralized API client
@@ -53,6 +62,7 @@ cd frontend && npm run test
 - `router/` — Vue Router configuration
 
 ### Database
+
 - MariaDB via Docker Compose
 - `spring.jpa.hibernate.ddl-auto=update` (dev), `validate` (prod)
 - Credentials via environment variables (see `.env.example`)
@@ -69,6 +79,7 @@ cd frontend && npm run test
 8. **Every public method has Javadoc** (backend) or JSDoc (frontend).
 
 ## Known Issues Fixed
+
 - `Assignee.java` had dead `Logger` field (never initialized — NPE risk). Removed.
 - `ApiVersion1.java` meta-annotation was unused. Removed.
 - `ddl-auto=create-drop` destroyed DB on shutdown. Changed to `update`.
@@ -77,4 +88,5 @@ cd frontend && npm run test
 - `@ManyToMany(fetch = EAGER)` caused N+1. Changed to `LAZY`.
 
 ## Environment Variables
+
 See `.env.example` for all configurable variables.
