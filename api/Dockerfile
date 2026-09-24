@@ -4,7 +4,7 @@ COPY api/pom.xml ./pom.xml
 RUN mvn dependency:go-offline
 COPY api/src ./src
 RUN mvn clean install -DskipTests=true -Dcheckstyle.skip=true
-RUN cp target/rest-api.jar ./app.jar
+RUN cp target/todo-api.jar ./app.jar
 
 FROM eclipse-temurin:25-jre-alpine AS production-stage
 WORKDIR /app

@@ -10,11 +10,11 @@
         <version>4.1.1</version>
     </parent>
 
-    <groupId>de.unistuttgart.iste.ese</groupId>
-    <artifactId>api</artifactId>
+    <groupId>io.github.daniilperkin</groupId>
+    <artifactId>todo-api</artifactId>
     <version>0.6.0</version>
-    <name>rest-api</name>
-    <description>REST API example project</description>
+    <name>todo-api</name>
+    <description>REST API for the todo app</description>
 
     <properties>
         <java.version>21</java.version>
@@ -112,7 +112,7 @@
     </dependencies>
 
     <build>
-        <finalName>rest-api</finalName>
+        <finalName>todo-api</finalName>
         <plugins>
             <!-- plugin for spring-boot hot reload dev server -->
             <plugin>
