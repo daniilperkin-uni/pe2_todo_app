@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import type { Assignee } from '@/types/assignee';
 import { Button } from 'agnostic-vue';
 

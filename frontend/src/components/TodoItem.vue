@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
+import { computed } from 'vue';
 import type { Todo } from '@/types/todo';
 import { isOverdue } from '@/ts/dueDateFilters';
 import { Button } from 'agnostic-vue';

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
 import type { Todo } from '@/types/todo';
 import TodoItem from '@/components/TodoItem.vue';
 
