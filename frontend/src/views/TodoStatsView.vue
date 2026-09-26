@@ -10,9 +10,27 @@ const stats = ref<TodoStats | null>(null);
 const correctionStats = ref<PriorityCorrectionStats | null>(null);
 const isLoading = ref<boolean>(true);
 
-// Fixed palette for the category pie slices; keys are assigned in insertion
-// order so colors stay stable between reloads with the same data shape.
-const PIE_COLORS = ['#009ee2', '#f5a623', '#7ed321', '#9013fe', '#d0021b', '#4a90d9'];
+// Chart palette taken from the design tokens: one place to theme the charts,
+// and the palette stays readable with red-green colour blindness (Okabe-Ito).
+// Keys are assigned in insertion order so colors stay stable between reloads
+// with the same data shape.
+const PIE_COLORS = [
+  'var(--color-chart-series-1)',
+  'var(--color-chart-series-2)',
+  'var(--color-chart-series-3)',
+  'var(--color-chart-series-4)',
+  'var(--color-chart-series-5)',
+  'var(--color-chart-series-6)',
+];
+
+// Priority bars are coloured by the priority name instead of the row order, so
+// a missing priority cannot shift the colours of the remaining bars.
+const PRIORITY_BAR_COLORS: Record<string, string> = {
+  HIGH: 'var(--color-chart-series-6)',
+  MEDIUM: 'var(--color-chart-series-1)',
+  LOW: 'var(--color-chart-series-3)',
+};
+const DEFAULT_BAR_COLOR = 'var(--color-chart-series-4)';
 
 // Bar-chart geometry: the SVG viewBox the bars are laid out in.
 const BAR_WIDTH = 480;
@@ -147,7 +165,7 @@ onMounted(fetchStats);
                 :width="(entry.count / maxAssigneeCount) * (BAR_WIDTH - 190)"
                 height="20"
                 rx="4"
-                fill="#009ee2"
+                fill="var(--color-chart-series-5)"
               />
               <text :x="156 + (entry.count / maxAssigneeCount) * (BAR_WIDTH - 190)" :y="index * 36 + 19" class="bar-value">
                 {{ entry.count }}
@@ -175,7 +193,7 @@ onMounted(fetchStats);
                 :width="(entry[1] / maxPriorityCount) * (BAR_WIDTH - 160)"
                 height="26"
                 rx="4"
-                :fill="['#d0021b', '#f5a623', '#7ed321'][index % 3]"
+                :fill="PRIORITY_BAR_COLORS[entry[0]] ?? DEFAULT_BAR_COLOR"
               />
               <text :x="118 + (entry[1] / maxPriorityCount) * (BAR_WIDTH - 160)" :y="index * 44 + 22" class="bar-value">
                 {{ entry[1] }}

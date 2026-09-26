@@ -4,6 +4,12 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     {
+      // The app is served at the root URL, e.g. http://localhost/; without
+      // this redirect the shell rendered without any view.
+      path: '/',
+      redirect: '/todos'
+    },
+    {
       path: '/assignees',
       name: 'assignees',
       component: () => import('../views/AssigneesView.vue')
@@ -50,9 +56,14 @@ const router = createRouter({
       name: 'edit-todo',
       component: () => import('../views/CreateUpdateTodoView.vue'),
       props: true
+    },
+    {
+      // Unknown URLs (a typo or an old bookmark) used to render an empty
+      // shell; show an explicit not-found page instead.
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue')
     }
-
-
   ]
 })
 

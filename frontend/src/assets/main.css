@@ -6,8 +6,8 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #f4f7f6; /* Light grey background */
-    color: #333;
+    background-color: var(--color-background); /* Light grey background */
+    color: var(--color-text);
 }
 
 /* Container for main content */
@@ -20,27 +20,27 @@ body {
 
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
-    color: #2c3e50;
+    color: var(--color-text);
     margin-bottom: 1rem;
     font-weight: 600;
 }
 
 h1 {
     font-size: 2.5rem;
-    border-bottom: 2px solid #42b983; /* Vue green */
+    border-bottom: 2px solid var(--color-primary);
     padding-bottom: 0.5rem;
     margin-bottom: 1.5rem;
 }
 
 /* Links */
 a {
-    color: #42b983;
+    color: var(--color-primary);
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #368a68;
+    color: var(--color-primary-dark);
     text-decoration: underline;
 }
 
@@ -62,8 +62,8 @@ input[type="date"],
 textarea,
 select {
     padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
     font-size: 1em;
     width: 100%;
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
@@ -85,12 +85,12 @@ textarea {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: var(--color-text);
 }
 
 /* Error Messages */
 .error-message {
-    color: #e74c3c; /* Red for errors */
+    color: var(--color-error); /* Red for errors */
     font-size: 0.9em;
     margin-top: -5px;
     margin-bottom: 10px;
@@ -99,9 +99,9 @@ textarea {
 
 /* Utility classes */
 .card {
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-md);
     padding: 20px;
     margin-bottom: 20px;
 }
@@ -140,23 +140,23 @@ textarea {
 
 /* Agnostic-Vue Header Overrides */
 .header {
-    background-color: #ffffff !important;
-    color: #333 !important;
+    background-color: var(--color-surface) !important;
+    color: var(--color-text) !important;
     padding: 0 1rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--box-shadow-sm);
 }
 
 .header-nav a {
-    color: #333 !important;
+    color: var(--color-text) !important;
     font-weight: 500;
     padding: 0.5rem 1rem;
-    border-radius: 4px;
+    border-radius: var(--border-radius-sm);
 }
 
 .header-nav a:hover,
 .header-nav a.router-link-exact-active {
-    color: #42b983 !important; /* Vue green for active/hover */
-    background-color: #f2f2f2 !important;
+    color: var(--color-primary) !important;
+    background-color: var(--color-secondary) !important;
 }
 
 .header-nav a.router-link-exact-active {

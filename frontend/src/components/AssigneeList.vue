@@ -30,10 +30,10 @@ function handleDetails(id: number) {
       <thead>
         <tr>
           <th>ID</th>
-          <th>Vorname</th>
-          <th>Nachname</th>
-          <th>E-Mail</th>
-          <th>Aktionen</th>
+          <th>Prename</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -43,9 +43,9 @@ function handleDetails(id: number) {
           <td>{{ assignee.name }}</td>
           <td>{{ assignee.email }}</td>
           <td>
-            <Button small mode="primary" @click="handleEdit(assignee.id)">Bearbeiten</Button>
+            <Button small mode="primary" @click="handleEdit(assignee.id)">Edit</Button>
             <Button small mode="secondary" @click="handleDetails(assignee.id)">Details</Button>
-            <Button small mode="danger" @click="handleDelete(assignee.id)">Löschen</Button>
+            <Button small mode="danger" @click="handleDelete(assignee.id)">Delete</Button>
           </td>
         </tr>
       </tbody>
@@ -63,11 +63,11 @@ table {
   border-collapse: collapse;
 }
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   padding: 8px;
   text-align: left;
 }
 th {
-  background-color: #f2f2f2;
+  background-color: var(--color-secondary);
 }
 </style>
