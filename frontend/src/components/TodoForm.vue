@@ -56,14 +56,16 @@ watchEffect(() => {
   }
 });
 
-// Validates the form fields. The due date, when provided, must lie strictly
-// in the future to match the backend rule in TodoService.validateDueDate.
+// Validates the form fields. A due date that was changed must lie strictly in
+// the future to match the backend rule in TodoService.validateDueDate; the due
+// date the todo already carries is accepted so an overdue todo stays editable.
 function validateForm() {
   errors.value = {};
   if (!todoForm.value.title) {
     errors.value.title = 'Title is required.';
   }
-  if (todoForm.value.dueDate) {
+  const unchangedDueDate = props.initialTodo?.dueDate === todoForm.value.dueDate;
+  if (todoForm.value.dueDate && !unchangedDueDate) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const due = new Date(todoForm.value.dueDate + 'T00:00:00');

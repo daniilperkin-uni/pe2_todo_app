@@ -15,7 +15,11 @@ async function handleSubmit(assignee: AssigneeCreateUpdate) {
     router.push('/assignees');
   } catch (error) {
     console.error('Error creating assignee:', error);
-    showToast(new Toast('Error', 'Failed to create assignee.', 'error'));
+    // Surface the server message: the backend answers with an RFC-7807 body
+    // (e.g. the required uni-stuttgart.de email domain), which is far more
+    // useful than a generic failure text.
+    const message = error instanceof Error ? error.message : String(error);
+    showToast(new Toast('Error', `Failed to create assignee: ${message}`, 'error'));
   }
 }
 

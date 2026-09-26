@@ -24,17 +24,25 @@ watchEffect(() => {
   }
 });
 
+// Mirrors the backend @Pattern on AssigneeCreateUpdateDTO.email so an address
+// without a uni-stuttgart.de domain is rejected in the form instead of only
+// failing server-side after the round trip.
+const UNI_EMAIL_PATTERN = /^[^\s@]+@(stud\.|iste\.|ipvs\.|sec\.)?uni-stuttgart\.de$/;
+
 // Validiert die Formularfelder des Zuständigen.
 function validateForm() {
   errors.value = {};
   if (!assigneeForm.value.prename) {
-    errors.value.prename = 'Vorname ist erforderlich.';
+    errors.value.prename = 'Prename is required.';
   }
   if (!assigneeForm.value.name) {
-    errors.value.name = 'Nachname ist erforderlich.';
+    errors.value.name = 'Name is required.';
   }
-  if (!assigneeForm.value.email) {
-    errors.value.email = 'E-Mail ist erforderlich.';
+  const email = assigneeForm.value.email.trim();
+  if (!email) {
+    errors.value.email = 'Email is required.';
+  } else if (!UNI_EMAIL_PATTERN.test(email)) {
+    errors.value.email = 'Email must be a uni-stuttgart.de address, e.g. name@iste.uni-stuttgart.de.';
   }
 
   return Object.keys(errors.value).length === 0;
@@ -60,26 +68,26 @@ function handleCancel() {
 <template>
   <form @submit.prevent="handleSubmit" class="assignee-form card border-none">
     <div class="form-group">
-      <label for="prename">Vorname:</label>
+      <label for="prename">Prename:</label>
       <input type="text" id="prename" v-model="assigneeForm.prename" @input="delete errors.prename" />
       <span v-if="errors.prename" class="error-message">{{ errors.prename }}</span>
     </div>
 
     <div class="form-group">
-      <label for="name">Nachname:</label>
+      <label for="name">Name:</label>
       <input type="text" id="name" v-model="assigneeForm.name" @input="delete errors.name" />
       <span v-if="errors.name" class="error-message">{{ errors.name }}</span>
     </div>
 
     <div class="form-group">
-      <label for="email">E-Mail:</label>
+      <label for="email">Email:</label>
       <input type="email" id="email" v-model="assigneeForm.email" @input="delete errors.email" />
       <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
     </div>
 
     <div class="form-actions">
       <Button type="submit" mode="primary">{{ isEdit ? 'Update Assignee' : 'Create Assignee' }}</Button>
-      <Button type="button" mode="secondary" @click="handleCancel">Abbrechen</Button>
+      <Button type="button" mode="secondary" @click="handleCancel">Cancel</Button>
     </div>
   </form>
 </template>
@@ -102,11 +110,11 @@ function handleCancel() {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
 }
 .error-message {
-  color: red;
+  color: var(--color-error);
   font-size: 0.9em;
   margin-top: 5px;
   display: block;
