@@ -2,7 +2,7 @@ package de.unistuttgart.iste.ese.api.assignee.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern; // <-- WICHTIG: Import hier geändert!
+import jakarta.validation.constraints.Pattern;
 
 public class AssigneeCreateUpdateDTO {
     @NotBlank(message = "Prename must not be blank")
