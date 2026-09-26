@@ -26,10 +26,13 @@ Mit Docker Compose läuft alles inklusive MariaDB mit einem Befehl.
 ## Schnellstart mit Docker Compose
 
 ```bash
+cp .env.example .env   # einmalig: DB_USERNAME und DB_PASSWORD eintragen
 docker compose up --build
 ```
 
 Das startet MariaDB, das Backend und Nginx mit dem gebauten Frontend.
+Ohne `.env` bricht `docker compose` mit einer klaren Meldung ab, weil es keine
+hartcodierten Zugangsdaten mehr gibt.
 Die App läuft dann unter <http://localhost>, die API unter `http://localhost/api/v1/...`.
 Daten bleiben über `docker compose down` / `up` hinweg erhalten.
 
@@ -40,6 +43,7 @@ Voraussetzungen: JDK 21, Node.js 22 und Docker (für MariaDB).
 ```bash
 docker run -d --name pe2-mariadb -p 3306:3306 \
   -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=pe2 mariadb:latest
+export DB_USERNAME=root DB_PASSWORD=root   # required, no defaults in the app
 cd api && ./mvnw spring-boot:run        # http://localhost:8080
 cd frontend && npm install && npm run dev  # http://localhost:5173
 ```

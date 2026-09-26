@@ -2,7 +2,7 @@
 
 Dies ist ein Beispielprojekt für ein Single-Page-Application-Frontend mit Vue.js v3. Die Benutzeroberfläche ist während der Entwicklung unter <http://localhost:5173> erreichbar und normalerweise unter `http://localhost`, wenn sie über Docker Compose ausgeführt wird.
 
-Siehe [HELP.md](HELP.md) für weitere Informationen.
+Voraussetzung ist Node.js 22 oder neuer (`engines` in `frontend/package.json`).
 
 ## Übersicht
 
@@ -22,7 +22,8 @@ Das Frontend ist eine moderne Vue.js-Anwendung im Verzeichnis `frontend`. Es ist
 * **Quellcode:** `frontend/src`
 * **Abhängigkeiten:** `frontend/package.json`
 * **Build-Konfiguration:** `frontend/vite.config.ts`
-* **API-Kommunikation:** Zentral verwaltet in `frontend/src/services/apiService.ts`, nutzt die `fetch`-API des Browsers und enthält einen einfachen Offline-Fallback.
+* **API-Kommunikation:** Zentral verwaltet in `frontend/src/services/apiService.ts`, nutzt die `fetch`-API des Browsers und wirft bei einem fehlgeschlagenen Request einen `Error` (kein Offline-Fallback, keine erfundenen Daten).
+* **Tests:** Vitest-Specs liegen neben dem getesteten Code (`frontend/src/**/*.test.ts`).
 * **Styling:** Nutzt `agnostic-vue` und Scoped CSS.
 
 ## Starten (Entwicklung)
@@ -69,15 +70,18 @@ So erstellen Sie die produktionsbereiten statischen Assets:
 
 ## Code-Qualität
 
-* **Linting:** `npm run lint`, um nach ESLint-Problemen zu suchen.
+* **Typprüfung:** `npm run type-check` (vue-tsc).
+* **Tests:** `npm test` (Vitest).
+* **Linting:** `npm run lint:ci`, um nach ESLint-Problemen zu suchen (ohne Auto-Fix; exakt das CI-Gate).
 * **Formatierung:** `npm run format`, um den Code automatisch mit Prettier zu formatieren.
+* **Build:** `npm run build` (Typprüfung + `vite build`).
 
 ## Docker-Integration
 
 Das Frontend verwendet ein mehrstufiges `Dockerfile` (`frontend/Dockerfile`). Es baut die Vue.js-Anwendung mit `vite` und stellt dann die statischen Assets über einen Nginx-Webserver bereit. Die Datei `frontend/nginx.conf` konfiguriert Nginx so, dass die Vue-App bereitgestellt wird und API-Anfragen von `/api` an den Backend-Dienst weitergeleitet werden.
 
-## UI/UX Änderungen und Lokalisierung
+## UI/UX Änderungen
 
 * **Suche und Filter:** Suche nach Titel und Sortierung nach verschiedenen Attributen (Titel, Priorität, Fälligkeitsdatum) in der ToDo-Übersicht implementiert.
 * **Aufgabentrennung:** Offene und erledigte Aufgaben werden jetzt in separaten Abschnitten angezeigt, um eine bessere Übersicht zu ermöglichen.
-* **Gemischtsprachige UI:** Die Benutzeroberfläche verwendet Deutsch für allgemeine UI-Elements (Labels, Nachrichten), während Kernentitätsnamen wie "Assignees" und "Todos" zur Konsistenz auf Englisch bleiben.
+* **Sprache:** Die Benutzeroberfläche ist durchgehend Englisch (Labels, Meldungen, Tabellenköpfe). Kernentitätsnamen wie "Assignees" und "Todos" bleiben ebenfalls Englisch.
