@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -234,7 +235,10 @@ public class TodoService {
     /**
      * Updates an existing todo.
      *
-     * <p>Applies the same due-date validation as {@link #createTodo}.
+     * <p>Applies the due-date validation of {@link #createTodo} whenever the
+     * due date differs from the stored one; an unchanged (possibly past) due
+     * date is accepted so overdue todos remain editable and finishable.
+     * Finishing a recurring todo spawns its next occurrence.
      *
      * @param id      the identifier of the todo to update
      * @param todoDTO the new data
@@ -243,11 +247,21 @@ public class TodoService {
      *     or {@code 400} for validation failures
      */
     public TodoDTO updateTodo(Long id, TodoCreateUpdateDTO todoDTO) {
-        validateDueDate(todoDTO);
         Todo existingTodo = todoRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found with id " + id));
+        // The future-due-date rule only applies to a due date that is actually
+        // being changed. An overdue todo keeps its (past) due date when it is
+        // ticked finished from the list, so validating the unchanged value
+        // would make overdue todos impossible to complete or edit.
+        if (!Objects.equals(todoDTO.getDueDate(), existingTodo.getDueDate())) {
+            validateDueDate(todoDTO);
+        }
+        // convertToEntity mutates the passed instance in place, therefore the
+        // previous finished state must be captured before the conversion -
+        // otherwise the just-finished transition below can never be detected.
+        boolean wasFinished = existingTodo.isFinished();
         Todo updatedTodo = convertToEntity(todoDTO, existingTodo);
-        boolean justFinished = !existingTodo.isFinished() && updatedTodo.isFinished();
+        boolean justFinished = !wasFinished && updatedTodo.isFinished();
         Todo savedTodo = todoRepository.save(updatedTodo);
         if (justFinished) {
             spawnNextRecurrence(savedTodo);

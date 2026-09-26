@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import de.unistuttgart.iste.ese.api.todo.Todo;
+import de.unistuttgart.iste.ese.api.todo.TodoRepository;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +58,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TodoControllerTest {
 
     @Autowired private MockMvc mockMvc;
+
+    @Autowired private TodoRepository todoRepository;
 
     private List<JSONObject> assigneeList = new ArrayList<>();
     private JSONObject testTodo;
@@ -158,6 +162,29 @@ public class TodoControllerTest {
     }
 
     @Test
+    @DisplayName("finishing a recurring todo via PUT spawns the next occurrence")
+    public void editRecurringTodoSpawnsNextOccurrence() throws Exception {
+        testTodo.put("recurrenceRule", "WEEKLY");
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+        LocalDate dueDate = LocalDate.parse(getDueDate(todoJson));
+        setFinished(todoJson, true);
+
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finished").value(true));
+
+        JSONArray todos = new JSONArray(mockMvc.perform(get("/api/v1/todos"))
+                                              .andExpect(status().isOk())
+                                              .andReturn().getResponse().getContentAsString());
+        Assertions.assertEquals(2, todos.length(), "finishing a recurring todo must spawn the next occurrence");
+        JSONObject successor = todos.getJSONObject(0).getLong("id") == getId(todoJson) ? todos.getJSONObject(1) : todos.getJSONObject(0);
+        Assertions.assertFalse(successor.getBoolean("finished"), "the successor must start unfinished");
+        Assertions.assertEquals(getTitle(todoJson), successor.getString("title"));
+        Assertions.assertEquals("WEEKLY", successor.getString("recurrenceRule"));
+        Assertions.assertEquals(dueDate.plusWeeks(1).format(DateTimeFormatter.ISO_LOCAL_DATE), successor.getString("dueDate"));
+    }
+
+    @Test
     @DisplayName("validation: todo with empty title fails (400)")
     public void createInvalidTodoEmptyTitle() throws Exception {
         setTitle(testTodo, "");
@@ -195,6 +222,41 @@ public class TodoControllerTest {
 
         setDueDate(testTodo, LocalDate.now().minusDays(30).format(DateTimeFormatter.ISO_LOCAL_DATE));
         createTodo(testTodo, status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("completing an overdue todo with its unchanged due date succeeds (200)")
+    public void editOverdueTodoWithUnchangedDueDate() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+        String pastDueDate = LocalDate.now().minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        backdateDueDate(getId(todoJson), pastDueDate);
+
+        setFinished(todoJson, true);
+        setDueDate(todoJson, pastDueDate);
+
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finished").value(true))
+               .andExpect(jsonPath("$.dueDate").value(pastDueDate));
+    }
+
+    @Test
+    @DisplayName("validation: moving an overdue todo to a new past due date fails (400)")
+    public void editOverdueTodoWithNewPastDueDate() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+        backdateDueDate(getId(todoJson), LocalDate.now().minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        setDueDate(todoJson, LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE));
+
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isBadRequest());
+    }
+
+    // Moves the stored due date into the past; the API does not allow creating
+    // an already overdue todo, so an overdue todo can only be arranged here.
+    private void backdateDueDate(long todoId, String dueDate) {
+        Todo todo = todoRepository.findById(todoId).orElseThrow();
+        todo.setDueDate(LocalDate.parse(dueDate));
+        todoRepository.save(todo);
     }
 
     @Test
