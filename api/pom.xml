@@ -145,8 +145,8 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <!-- Measured 2026-08-22 at 87.3% line coverage
-                                 (39 tests incl. TodoClassifier unit tests).
+                            <!-- Measured 2026-10-02 at 89.0% line coverage
+                                 (67 tests incl. TodoClassifier unit tests).
                                  0.80 gates regressions while leaving headroom
                                  for legitimate new untested code during
                                  development. Raise it as coverage grows. -->

@@ -18,6 +18,12 @@ public class TodoClassifier {
     private static final Logger LOGGER = LoggerFactory.getLogger(TodoClassifier.class);
     private Evaluator evaluator;
 
+    /**
+     * Loads the bundled PMML model ({@code /model.pmml}) and verifies it.
+     *
+     * <p>When loading fails the classifier stays uninitialized and
+     * {@link #classify(String)} falls back to the deterministic keyword rules.
+     */
     @PostConstruct
     public void init() {
         try (InputStream inputStream = getClass().getResourceAsStream("/model.pmml")) {
@@ -35,6 +41,12 @@ public class TodoClassifier {
         }
     }
 
+    /**
+     * Classifies a todo title into the model's category.
+     *
+     * @param title the todo title; may be {@code null}
+     * @return {@code "work"} or {@code "private"}; never {@code null}
+     */
     public String classify(String title) {
         if (evaluator == null) {
             LOGGER.warn("Evaluator not initialized. Using deterministic fallback.");

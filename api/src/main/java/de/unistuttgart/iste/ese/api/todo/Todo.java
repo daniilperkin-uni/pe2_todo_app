@@ -183,21 +183,6 @@ public class Todo {
     }
 
     /**
-     * Setzt das Erstellungsdatum des Todos
-     *
-     * @throws IllegalStateException if the created date has already been set, as it
-     *     is an audit timestamp populated by {@link #onCreate()} via @PrePersist and
-     *     must not be overridden
-     */
-    public void setCreatedDate(LocalDate createdDate) {
-        if (this.createdDate != null) {
-            throw new IllegalStateException(
-                "createdDate is set by @PrePersist and cannot be overridden.");
-        }
-        this.createdDate = createdDate;
-    }
-
-    /**
      * Gibt das Fälligkeitsdatum des Todos zurück
      */
     public LocalDate getDueDate() {

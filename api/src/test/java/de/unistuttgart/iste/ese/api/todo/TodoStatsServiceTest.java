@@ -46,13 +46,9 @@ class TodoStatsServiceTest {
         t.setTitle(title);
         t.setPriority(priority);
         t.setFinished(finished);
+        setCreatedDate(t, created);
         if (finishedDate != null) {
-            // createdDate is guarded by the entity setter; use reflection-free
-            // construction by setting it before any persist would happen.
-            setCreatedDate(t, created);
             t.setFinishedDate(finishedDate);
-        } else {
-            setCreatedDate(t, created);
         }
         t.setDueDate(due);
         t.setCategory(category);
@@ -62,6 +58,8 @@ class TodoStatsServiceTest {
         return t;
     }
 
+    // createdDate is populated by @PrePersist on save and has no public setter,
+    // so test fixtures arrange it reflectively.
     private void setCreatedDate(Todo t, LocalDate date) {
         try {
             var field = Todo.class.getDeclaredField("createdDate");
