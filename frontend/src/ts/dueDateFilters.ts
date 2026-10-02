@@ -1,4 +1,4 @@
-import type { Todo } from '@/types/todo';
+import type { Todo } from '@/types/todo'
 
 /**
  * Available due-date filter options for the todo list view.
@@ -9,10 +9,10 @@ import type { Todo } from '@/types/todo';
  * - `overdue`: due date is in the past and the todo is not finished
  * - `noDueDate`: the todo has no due date at all
  */
-export type DueFilter = 'all' | 'dueToday' | 'dueThisWeek' | 'overdue' | 'noDueDate';
+export type DueFilter = 'all' | 'dueToday' | 'dueThisWeek' | 'overdue' | 'noDueDate'
 
 /** Minimal shape of a todo needed for due-date filtering. */
-export type DueDateFilterable = Pick<Todo, 'dueDate' | 'finished'>;
+export type DueDateFilterable = Pick<Todo, 'dueDate' | 'finished'>
 
 /**
  * Converts a date into a comparable day number (YYYYMMDD).
@@ -24,7 +24,7 @@ export type DueDateFilterable = Pick<Todo, 'dueDate' | 'finished'>;
  * @returns an integer of the form YYYYMMDD
  */
 function toDayNumber(date: Date): number {
-  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+  return date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate()
 }
 
 /**
@@ -34,17 +34,17 @@ function toDayNumber(date: Date): number {
  * @returns the parsed Date, or `null` when the value is empty or malformed
  */
 export function parseIsoDate(value: string | null | undefined): Date | null {
-  if (!value) return null;
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
-  if (!match) return null;
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const date = new Date(year, month - 1, day);
+  if (!value) return null
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
+  if (!match) return null
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  const date = new Date(year, month - 1, day)
   if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-    return null;
+    return null
   }
-  return date;
+  return date
 }
 
 /**
@@ -56,10 +56,10 @@ export function parseIsoDate(value: string | null | undefined): Date | null {
  * @returns the Sunday of that week at midnight
  */
 export function endOfWeek(date: Date): Date {
-  const result = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const daysSinceMonday = (result.getDay() + 6) % 7; // Monday = 0 ... Sunday = 6
-  result.setDate(result.getDate() + (6 - daysSinceMonday));
-  return result;
+  const result = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const daysSinceMonday = (result.getDay() + 6) % 7 // Monday = 0 ... Sunday = 6
+  result.setDate(result.getDate() + (6 - daysSinceMonday))
+  return result
 }
 
 /**
@@ -71,9 +71,9 @@ export function endOfWeek(date: Date): Date {
  * @returns `true` when the todo is overdue
  */
 export function isOverdue(todo: DueDateFilterable, today: Date = new Date()): boolean {
-  const due = parseIsoDate(todo.dueDate);
-  if (!due || todo.finished) return false;
-  return toDayNumber(due) < toDayNumber(today);
+  const due = parseIsoDate(todo.dueDate)
+  if (!due || todo.finished) return false
+  return toDayNumber(due) < toDayNumber(today)
 }
 
 /**
@@ -87,26 +87,26 @@ export function isOverdue(todo: DueDateFilterable, today: Date = new Date()): bo
 export function matchesDueFilter(
   todo: DueDateFilterable,
   filter: DueFilter,
-  today: Date = new Date(),
+  today: Date = new Date()
 ): boolean {
-  const due = parseIsoDate(todo.dueDate);
+  const due = parseIsoDate(todo.dueDate)
 
   switch (filter) {
     case 'all':
-      return true;
+      return true
     case 'noDueDate':
-      return due === null;
+      return due === null
     case 'dueToday':
-      return due !== null && toDayNumber(due) === toDayNumber(today);
+      return due !== null && toDayNumber(due) === toDayNumber(today)
     case 'dueThisWeek': {
-      if (!due) return false;
-      const day = toDayNumber(due);
-      return day >= toDayNumber(today) && day <= toDayNumber(endOfWeek(today));
+      if (!due) return false
+      const day = toDayNumber(due)
+      return day >= toDayNumber(today) && day <= toDayNumber(endOfWeek(today))
     }
     case 'overdue':
-      return isOverdue(todo, today);
+      return isOverdue(todo, today)
     default:
-      return true;
+      return true
   }
 }
 
@@ -121,7 +121,7 @@ export function matchesDueFilter(
 export function applyDueFilter<T extends DueDateFilterable>(
   todos: T[],
   filter: DueFilter,
-  today: Date = new Date(),
+  today: Date = new Date()
 ): T[] {
-  return todos.filter((todo) => matchesDueFilter(todo, filter, today));
+  return todos.filter((todo) => matchesDueFilter(todo, filter, today))
 }

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory  } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -29,7 +29,7 @@ const router = createRouter({
       path: '/assignees/:id/edit',
       name: 'edit-assignee',
       component: () => import('../views/AssigneeDetailsView.vue'),
-      props: route => ({ ...route.params, isEditing: true })
+      props: (route) => ({ ...route.params, isEditing: true })
     },
     {
       path: '/todos',

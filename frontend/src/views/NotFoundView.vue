@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { Button } from 'agnostic-vue';
+import { useRouter } from 'vue-router'
+import { Button } from 'agnostic-vue'
 
-const router = useRouter();
+const router = useRouter()
 </script>
 
 <template>

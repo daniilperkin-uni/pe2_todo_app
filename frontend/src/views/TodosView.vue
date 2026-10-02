@@ -1,108 +1,114 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import type { Todo } from '@/types/todo';
-import { getTodos, updateTodo, deleteTodo, downloadTodosCsv, createPriorityCorrection } from '@/services/apiService';
-import TodoList from '@/components/TodoList.vue';
-import { applyDueFilter, type DueFilter } from '@/ts/dueDateFilters';
-import { showToast, Toast } from '@/ts/toasts';
-import { Button } from 'agnostic-vue';
-import { saveAs } from 'file-saver';
-import type { Priority } from '@/types/todo';
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import type { Todo } from '@/types/todo'
+import {
+  getTodos,
+  updateTodo,
+  deleteTodo,
+  downloadTodosCsv,
+  createPriorityCorrection
+} from '@/services/apiService'
+import TodoList from '@/components/TodoList.vue'
+import { applyDueFilter, type DueFilter } from '@/ts/dueDateFilters'
+import { showToast, Toast } from '@/ts/toasts'
+import { Button } from 'agnostic-vue'
+import { saveAs } from 'file-saver'
+import type { Priority } from '@/types/todo'
 
-const router = useRouter();
-const todos = ref<Todo[]>([]);
-const isLoading = ref<boolean>(true);
-const isDownloadingCsv = ref<boolean>(false);
+const router = useRouter()
+const todos = ref<Todo[]>([])
+const isLoading = ref<boolean>(true)
+const isDownloadingCsv = ref<boolean>(false)
 // Which representation of the todo list the toggle button links to. The
 // TodosView itself always renders the list; the button switches to the board.
-const viewMode = computed(() => (router.currentRoute.value.path === '/board' ? 'board' : 'list'));
+const viewMode = computed(() => (router.currentRoute.value.path === '/board' ? 'board' : 'list'))
 // Identifier of the todo pending deletion confirmation, or null when the
 // confirmation dialog is closed. Replaces the blocking native confirm() call.
-const todoToDelete = ref<number | null>(null);
+const todoToDelete = ref<number | null>(null)
 
 // Todo whose predicted priority the user rejected; drives the correction dialog.
-const priorityFeedbackTodo = ref<Todo | null>(null);
-const correctedPriority = ref<Priority>('MEDIUM');
-const priorities: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
+const priorityFeedbackTodo = ref<Todo | null>(null)
+const correctedPriority = ref<Priority>('MEDIUM')
+const priorities: Priority[] = ['LOW', 'MEDIUM', 'HIGH']
 
 // Filter and Sort states
-const filterTitle = ref<string>('');
-const filterDue = ref<DueFilter>('all');
-const sortBy = ref<string>('createdDate');
+const filterTitle = ref<string>('')
+const filterDue = ref<DueFilter>('all')
+const sortBy = ref<string>('createdDate')
 
 const dueFilterOptions: { value: DueFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'dueToday', label: 'Due today' },
   { value: 'dueThisWeek', label: 'Due this week' },
   { value: 'overdue', label: 'Overdue' },
-  { value: 'noDueDate', label: 'No due date' },
-];
+  { value: 'noDueDate', label: 'No due date' }
+]
 
 const filteredAndSortedTodos = computed(() => {
-  let result = [...todos.value];
+  let result = [...todos.value]
 
   // Filter by title
   if (filterTitle.value) {
-    const search = filterTitle.value.toLowerCase();
-    result = result.filter((t) => t.title.toLowerCase().includes(search));
+    const search = filterTitle.value.toLowerCase()
+    result = result.filter((t) => t.title.toLowerCase().includes(search))
   }
 
   // Filter by due date
-  result = applyDueFilter(result, filterDue.value);
+  result = applyDueFilter(result, filterDue.value)
 
   // Sort
   result.sort((a, b) => {
     if (sortBy.value === 'title') {
-      return a.title.localeCompare(b.title);
+      return a.title.localeCompare(b.title)
     } else if (sortBy.value === 'dueDate') {
-      if (!a.dueDate) return 1;
-      if (!b.dueDate) return -1;
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (!a.dueDate) return 1
+      if (!b.dueDate) return -1
+      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
     } else if (sortBy.value === 'priority') {
-      const priorityMap: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-      return (priorityMap[a.priority] ?? 3) - (priorityMap[b.priority] ?? 3);
+      const priorityMap: Record<string, number> = { HIGH: 0, MEDIUM: 1, LOW: 2 }
+      return (priorityMap[a.priority] ?? 3) - (priorityMap[b.priority] ?? 3)
     } else if (sortBy.value === 'createdDate') {
-      if (!a.createdDate) return 1;
-      if (!b.createdDate) return -1;
-      return new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime();
+      if (!a.createdDate) return 1
+      if (!b.createdDate) return -1
+      return new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()
     }
-    return 0;
-  });
+    return 0
+  })
 
-  return result;
-});
+  return result
+})
 
-const openTodos = computed(() => filteredAndSortedTodos.value.filter((t) => !t.finished));
-const finishedTodos = computed(() => filteredAndSortedTodos.value.filter((t) => t.finished));
+const openTodos = computed(() => filteredAndSortedTodos.value.filter((t) => !t.finished))
+const finishedTodos = computed(() => filteredAndSortedTodos.value.filter((t) => t.finished))
 
 const sortOptions = [
   { value: 'createdDate', label: 'Date Created' },
   { value: 'title', label: 'Title' },
   { value: 'dueDate', label: 'Due Date' },
-  { value: 'priority', label: 'Priority' },
-];
+  { value: 'priority', label: 'Priority' }
+]
 
 // Fetches all todos from the backend and clears the loading state.
 async function fetchTodos() {
-  isLoading.value = true;
+  isLoading.value = true
   try {
-    todos.value = await getTodos();
+    todos.value = await getTodos()
   } catch (error) {
-    console.error('Error fetching todos:', error);
-    showToast(new Toast('Error', 'Failed to load todos. Please try again later.', 'error'));
+    console.error('Error fetching todos:', error)
+    showToast(new Toast('Error', 'Failed to load todos. Please try again later.', 'error'))
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
 // Toggles the finished state of a todo, optimistically updating the local list
 // and rolling back on failure.
 async function handleToggleFinished(id: number, finished: boolean) {
-  const todoToUpdate = todos.value.find((todo) => todo.id === id);
+  const todoToUpdate = todos.value.find((todo) => todo.id === id)
   if (todoToUpdate) {
-    const originalFinishedState = todoToUpdate.finished;
-    todoToUpdate.finished = finished;
+    const originalFinishedState = todoToUpdate.finished
+    todoToUpdate.finished = finished
     try {
       const updatePayload = {
         title: todoToUpdate.title,
@@ -110,51 +116,53 @@ async function handleToggleFinished(id: number, finished: boolean) {
         finished: finished,
         priority: todoToUpdate.priority,
         dueDate: todoToUpdate.dueDate,
-        assigneeIdList: todoToUpdate.assigneeList?.map((a) => a.id) || [],
-      };
-      await updateTodo(id, updatePayload);
-      showToast(new Toast('Success', `Todo marked as ${finished ? 'finished' : 'not finished'}.`, 'success'));
-      await fetchTodos();
+        assigneeIdList: todoToUpdate.assigneeList?.map((a) => a.id) || []
+      }
+      await updateTodo(id, updatePayload)
+      showToast(
+        new Toast('Success', `Todo marked as ${finished ? 'finished' : 'not finished'}.`, 'success')
+      )
+      await fetchTodos()
     } catch (error) {
-      console.error('Error toggling todo finished status:', error);
-      showToast(new Toast('Error', 'Failed to update todo status.', 'error'));
-      todoToUpdate.finished = originalFinishedState;
+      console.error('Error toggling todo finished status:', error)
+      showToast(new Toast('Error', 'Failed to update todo status.', 'error'))
+      todoToUpdate.finished = originalFinishedState
     }
   }
 }
 
 // Opens the in-app confirmation dialog for deleting the given todo.
 function requestDelete(id: number) {
-  todoToDelete.value = id;
+  todoToDelete.value = id
 }
 
 // Cancels the pending deletion and closes the confirmation dialog.
 function cancelDelete() {
-  todoToDelete.value = null;
+  todoToDelete.value = null
 }
 
 // Confirms the pending deletion, removing the todo and refreshing the list.
 async function confirmDelete() {
-  const id = todoToDelete.value;
-  if (id === null) return;
-  todoToDelete.value = null;
+  const id = todoToDelete.value
+  if (id === null) return
+  todoToDelete.value = null
   try {
-    await deleteTodo(id);
-    showToast(new Toast('Success', 'Todo deleted successfully!', 'success'));
-    await fetchTodos();
+    await deleteTodo(id)
+    showToast(new Toast('Success', 'Todo deleted successfully!', 'success'))
+    await fetchTodos()
   } catch (error: unknown) {
-    console.error('Error deleting todo:', error);
-    const message = error instanceof Error ? error.message : String(error);
-    showToast(new Toast('Error', `Failed to delete todo: ${message}`, 'error'));
+    console.error('Error deleting todo:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    showToast(new Toast('Error', `Failed to delete todo: ${message}`, 'error'))
   }
 }
 
 function handleEdit(id: number) {
-  router.push(`/todos/${id}/edit`);
+  router.push(`/todos/${id}/edit`)
 }
 
 function createNewTodo() {
-  router.push('/todos/create');
+  router.push('/todos/create')
 }
 
 /**
@@ -164,51 +172,56 @@ function createNewTodo() {
  * @param todo - the todo whose predicted priority was rejected
  */
 function openPriorityFeedback(todo: Todo) {
-  const order: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
-  const nextIndex = Math.min(order.indexOf(todo.priority) + 1, order.length - 1);
-  correctedPriority.value = order[nextIndex] ?? 'MEDIUM';
-  priorityFeedbackTodo.value = todo;
+  const order: Priority[] = ['LOW', 'MEDIUM', 'HIGH']
+  const nextIndex = Math.min(order.indexOf(todo.priority) + 1, order.length - 1)
+  correctedPriority.value = order[nextIndex] ?? 'MEDIUM'
+  priorityFeedbackTodo.value = todo
 }
 
 // Closes the correction dialog without recording anything.
 function cancelPriorityFeedback() {
-  priorityFeedbackTodo.value = null;
+  priorityFeedbackTodo.value = null
 }
 
 /**
  * Persists the correction and closes the dialog.
  */
 async function confirmPriorityFeedback() {
-  const todo = priorityFeedbackTodo.value;
-  if (!todo) return;
+  const todo = priorityFeedbackTodo.value
+  if (!todo) return
   try {
-    await createPriorityCorrection(todo.title, todo.priority, correctedPriority.value, todo.category);
-    showToast(new Toast('Success', 'Thanks! The corrected priority was recorded.', 'success'));
+    await createPriorityCorrection(
+      todo.title,
+      todo.priority,
+      correctedPriority.value,
+      todo.category
+    )
+    showToast(new Toast('Success', 'Thanks! The corrected priority was recorded.', 'success'))
   } catch (error) {
-    console.error('Error recording priority correction:', error);
-    const message = error instanceof Error ? error.message : String(error);
-    showToast(new Toast('Error', `Failed to record correction: ${message}`, 'error'));
+    console.error('Error recording priority correction:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    showToast(new Toast('Error', `Failed to record correction: ${message}`, 'error'))
   } finally {
-    priorityFeedbackTodo.value = null;
+    priorityFeedbackTodo.value = null
   }
 }
 
 // Downloads all todos as a CSV file via the backend CSV endpoint.
 async function handleDownloadCsv() {
-  isDownloadingCsv.value = true;
+  isDownloadingCsv.value = true
   try {
-    const csvBlob = await downloadTodosCsv();
-    saveAs(csvBlob, 'todos.csv');
-    showToast(new Toast('Success', 'Todos CSV downloaded successfully!', 'success'));
+    const csvBlob = await downloadTodosCsv()
+    saveAs(csvBlob, 'todos.csv')
+    showToast(new Toast('Success', 'Todos CSV downloaded successfully!', 'success'))
   } catch (error) {
-    console.error('Error downloading CSV:', error);
-    showToast(new Toast('Error', 'Failed to download todos CSV.', 'error'));
+    console.error('Error downloading CSV:', error)
+    showToast(new Toast('Error', 'Failed to download todos CSV.', 'error'))
   } finally {
-    isDownloadingCsv.value = false;
+    isDownloadingCsv.value = false
   }
 }
 
-onMounted(fetchTodos);
+onMounted(fetchTodos)
 </script>
 
 <template>
@@ -216,10 +229,7 @@ onMounted(fetchTodos);
     <div class="view-header">
       <h1 class="heading">Todos</h1>
       <div class="controls">
-        <Button
-          mode="secondary"
-          @click="router.push(viewMode === 'list' ? '/board' : '/todos')"
-        >
+        <Button mode="secondary" @click="router.push(viewMode === 'list' ? '/board' : '/todos')">
           {{ viewMode === 'list' ? 'Board View' : 'List View' }}
         </Button>
         <Button mode="secondary" @click="handleDownloadCsv" :disabled="isDownloadingCsv">
@@ -290,11 +300,17 @@ onMounted(fetchTodos);
 
     <!-- Priority-correction dialog opened from the thumbs-down control -->
     <div v-if="priorityFeedbackTodo" class="modal-overlay" @click.self="cancelPriorityFeedback">
-      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="priority-feedback-title">
+      <div
+        class="modal card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="priority-feedback-title"
+      >
         <h3 id="priority-feedback-title" class="modal-title">Wrong priority?</h3>
         <p class="modal-text">
-          The system predicted <strong>{{ priorityFeedbackTodo.priority }}</strong> for
-          "{{ priorityFeedbackTodo.title }}". What should it be?
+          The system predicted <strong>{{ priorityFeedbackTodo.priority }}</strong> for "{{
+            priorityFeedbackTodo.title
+          }}". What should it be?
         </p>
         <div class="filter-group">
           <label for="corrected-priority">Correct priority:</label>
@@ -311,7 +327,12 @@ onMounted(fetchTodos);
 
     <!-- In-app delete confirmation dialog (replaces native confirm()) -->
     <div v-if="todoToDelete !== null" class="modal-overlay" @click.self="cancelDelete">
-      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="confirm-delete-title">
+      <div
+        class="modal card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-delete-title"
+      >
         <h3 id="confirm-delete-title" class="modal-title">Delete this todo?</h3>
         <p class="modal-text">This action cannot be undone.</p>
         <div class="modal-actions">

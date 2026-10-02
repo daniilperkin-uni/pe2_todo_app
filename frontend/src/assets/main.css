@@ -2,163 +2,180 @@
 
 /* General Body Styling */
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-background); /* Light grey background */
-    color: var(--color-text);
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background); /* Light grey background */
+  color: var(--color-text);
 }
 
 /* Container for main content */
 #app {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-weight: normal;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
 }
 
 /* Headings */
-h1, h2, h3, h4, h5, h6 {
-    color: var(--color-text);
-    margin-bottom: 1rem;
-    font-weight: 600;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
 h1 {
-    font-size: 2.5rem;
-    border-bottom: 2px solid var(--color-primary);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 /* Links */
 a {
-    color: var(--color-primary);
-    text-decoration: none;
-    transition: color 0.3s ease;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.3s ease;
 }
 
 a:hover {
-    color: var(--color-primary-dark);
-    text-decoration: underline;
+  color: var(--color-primary-dark);
+  text-decoration: underline;
 }
 
 /* Buttons (Agnostic-Vue handles most, but general adjustments) */
 button {
-    cursor: pointer;
-    border-radius: 4px;
-    padding: 0.75em 1.2em;
-    font-size: 1em;
-    border: none;
-    transition: background-color 0.3s ease;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.75em 1.2em;
+  font-size: 1em;
+  border: none;
+  transition: background-color 0.3s ease;
 }
 
 /* Forms - general input styling */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="date"],
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='date'],
 textarea,
 select {
-    padding: 10px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-sm);
-    font-size: 1em;
-    width: 100%;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    margin-top: 5px;
-    margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 
 textarea {
-    resize: vertical;
-    min-height: 80px;
+  resize: vertical;
+  min-height: 80px;
 }
 
 /* Form Grouping for better layout */
 .form-group {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-    color: var(--color-text);
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: var(--color-text);
 }
 
 /* Error Messages */
 .error-message {
-    color: var(--color-error); /* Red for errors */
-    font-size: 0.9em;
-    margin-top: -5px;
-    margin-bottom: 10px;
-    display: block;
+  color: var(--color-error); /* Red for errors */
+  font-size: 0.9em;
+  margin-top: -5px;
+  margin-bottom: 10px;
+  display: block;
 }
 
 /* Utility classes */
 .card {
-    background-color: var(--color-surface);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--box-shadow-md);
-    padding: 20px;
-    margin-bottom: 20px;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--box-shadow-md);
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
 .border-none {
-    border: none !important;
+  border: none !important;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    #app {
-        padding: 1rem;
-    }
+  #app {
+    padding: 1rem;
+  }
 
-    h1 {
-        font-size: 2rem;
-    }
+  h1 {
+    font-size: 2rem;
+  }
 
-    .controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .search-bar input {
-        width: 100%;
-    }
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-bar input {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 1.8rem;
-    }
-    .form-actions button {
-        width: 100%;
-    }
+  h1 {
+    font-size: 1.8rem;
+  }
+  .form-actions button {
+    width: 100%;
+  }
 }
 
 /* Agnostic-Vue Header Overrides */
 .header {
-    background-color: var(--color-surface) !important;
-    color: var(--color-text) !important;
-    padding: 0 1rem;
-    box-shadow: var(--box-shadow-sm);
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  padding: 0 1rem;
+  box-shadow: var(--box-shadow-sm);
 }
 
 .header-nav a {
-    color: var(--color-text) !important;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius-sm);
+  color: var(--color-text) !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-sm);
 }
 
 .header-nav a:hover,
 .header-nav a.router-link-exact-active {
-    color: var(--color-primary) !important;
-    background-color: var(--color-secondary) !important;
+  color: var(--color-primary) !important;
+  background-color: var(--color-secondary) !important;
 }
 
 .header-nav a.router-link-exact-active {
-    font-weight: 700;
+  font-weight: 700;
 }

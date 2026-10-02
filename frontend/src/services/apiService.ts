@@ -1,9 +1,9 @@
-import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee';
-import type { Todo, TodoCreateUpdate, TodoStatus, Priority } from '@/types/todo';
-import type { TodoStats } from '@/types/todoStats';
-import type { PriorityCorrectionStats } from '@/types/priorityCorrections';
+import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee'
+import type { Todo, TodoCreateUpdate, TodoStatus, Priority } from '@/types/todo'
+import type { TodoStats } from '@/types/todoStats'
+import type { PriorityCorrectionStats } from '@/types/priorityCorrections'
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = '/api/v1'
 
 /**
  * Parses a fetch response, rejecting with an Error when the request failed.
@@ -17,18 +17,18 @@ const API_BASE_URL = '/api/v1';
  */
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `API request failed with status ${response.status}`);
+    const errorText = await response.text()
+    throw new Error(errorText || `API request failed with status ${response.status}`)
   }
 
   // Only parse as JSON when the server advertises a JSON content type.
-  const contentType = response.headers.get('content-type');
+  const contentType = response.headers.get('content-type')
   if (contentType && contentType.includes('application/json')) {
-    return response.json() as Promise<T>;
+    return response.json() as Promise<T>
   }
 
   // No content or non-JSON: return an empty object cast to the expected type.
-  return {} as T;
+  return {} as T
 }
 
 // --- Assignee API Calls ---
@@ -40,8 +40,8 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * @throws {Error} when the request fails or the backend returns a non-ok status
  */
 export async function getAssignees(): Promise<Assignee[]> {
-  const response = await fetch(`${API_BASE_URL}/assignees`);
-  return await handleResponse<Assignee[]>(response);
+  const response = await fetch(`${API_BASE_URL}/assignees`)
+  return await handleResponse<Assignee[]>(response)
 }
 
 /**
@@ -52,8 +52,8 @@ export async function getAssignees(): Promise<Assignee[]> {
  * @throws {Error} when the request fails or the assignee does not exist
  */
 export async function getAssignee(id: number): Promise<Assignee> {
-  const response = await fetch(`${API_BASE_URL}/assignees/${id}`);
-  return await handleResponse<Assignee>(response);
+  const response = await fetch(`${API_BASE_URL}/assignees/${id}`)
+  return await handleResponse<Assignee>(response)
 }
 
 /**
@@ -67,11 +67,11 @@ export async function createAssignee(assignee: AssigneeCreateUpdate): Promise<As
   const response = await fetch(`${API_BASE_URL}/assignees`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(assignee),
-  });
-  return await handleResponse<Assignee>(response);
+    body: JSON.stringify(assignee)
+  })
+  return await handleResponse<Assignee>(response)
 }
 
 /**
@@ -82,15 +82,18 @@ export async function createAssignee(assignee: AssigneeCreateUpdate): Promise<As
  * @returns the updated assignee
  * @throws {Error} when the request fails or the assignee does not exist
  */
-export async function updateAssignee(id: number, assignee: AssigneeCreateUpdate): Promise<Assignee> {
+export async function updateAssignee(
+  id: number,
+  assignee: AssigneeCreateUpdate
+): Promise<Assignee> {
   const response = await fetch(`${API_BASE_URL}/assignees/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(assignee),
-  });
-  return await handleResponse<Assignee>(response);
+    body: JSON.stringify(assignee)
+  })
+  return await handleResponse<Assignee>(response)
 }
 
 /**
@@ -101,12 +104,12 @@ export async function updateAssignee(id: number, assignee: AssigneeCreateUpdate)
  */
 export async function deleteAssignee(id: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/assignees/${id}`, {
-    method: 'DELETE',
-  });
+    method: 'DELETE'
+  })
   // DELETE often returns no content; just check whether the response is ok.
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `API delete request failed with status ${response.status}`);
+    const errorText = await response.text()
+    throw new Error(errorText || `API delete request failed with status ${response.status}`)
   }
 }
 
@@ -119,8 +122,8 @@ export async function deleteAssignee(id: number): Promise<void> {
  * @throws {Error} when the request fails or the backend returns a non-ok status
  */
 export async function getTodos(): Promise<Todo[]> {
-  const response = await fetch(`${API_BASE_URL}/todos`);
-  return await handleResponse<Todo[]>(response);
+  const response = await fetch(`${API_BASE_URL}/todos`)
+  return await handleResponse<Todo[]>(response)
 }
 
 /**
@@ -131,8 +134,8 @@ export async function getTodos(): Promise<Todo[]> {
  * @throws {Error} when the request fails or the todo does not exist
  */
 export async function getTodo(id: number): Promise<Todo> {
-  const response = await fetch(`${API_BASE_URL}/todos/${id}`);
-  return await handleResponse<Todo>(response);
+  const response = await fetch(`${API_BASE_URL}/todos/${id}`)
+  return await handleResponse<Todo>(response)
 }
 
 /**
@@ -146,11 +149,11 @@ export async function createTodo(todo: TodoCreateUpdate): Promise<Todo> {
   const response = await fetch(`${API_BASE_URL}/todos`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(todo),
-  });
-  return await handleResponse<Todo>(response);
+    body: JSON.stringify(todo)
+  })
+  return await handleResponse<Todo>(response)
 }
 
 /**
@@ -165,11 +168,11 @@ export async function updateTodo(id: number, todo: TodoCreateUpdate): Promise<To
   const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(todo),
-  });
-  return await handleResponse<Todo>(response);
+    body: JSON.stringify(todo)
+  })
+  return await handleResponse<Todo>(response)
 }
 
 /**
@@ -184,11 +187,11 @@ export async function transitionTodoStatus(id: number, status: TodoStatus): Prom
   const response = await fetch(`${API_BASE_URL}/todos/${id}/status`, {
     method: 'PATCH',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(status),
-  });
-  return await handleResponse<Todo>(response);
+    body: JSON.stringify(status)
+  })
+  return await handleResponse<Todo>(response)
 }
 
 /**
@@ -199,11 +202,11 @@ export async function transitionTodoStatus(id: number, status: TodoStatus): Prom
  */
 export async function deleteTodo(id: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/todos/${id}`, {
-    method: 'DELETE',
-  });
+    method: 'DELETE'
+  })
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `API delete request failed with status ${response.status}`);
+    const errorText = await response.text()
+    throw new Error(errorText || `API delete request failed with status ${response.status}`)
   }
 }
 
@@ -215,8 +218,8 @@ export async function deleteTodo(id: number): Promise<void> {
  * @throws {Error} when the request fails or the backend returns a non-ok status
  */
 export async function getTodoStats(): Promise<TodoStats> {
-  const response = await fetch(`${API_BASE_URL}/todos/stats`);
-  return await handleResponse<TodoStats>(response);
+  const response = await fetch(`${API_BASE_URL}/todos/stats`)
+  return await handleResponse<TodoStats>(response)
 }
 
 /**
@@ -232,21 +235,21 @@ export async function createPriorityCorrection(
   todoTitle: string,
   predictedPriority: Priority,
   correctedPriority: Priority,
-  category?: string | null,
+  category?: string | null
 ): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/todos/priority-corrections`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       todoTitle,
       predictedPriority,
       correctedPriority,
-      category: category ?? null,
-    }),
-  });
-  await handleResponse<unknown>(response);
+      category: category ?? null
+    })
+  })
+  await handleResponse<unknown>(response)
 }
 
 /**
@@ -256,8 +259,8 @@ export async function createPriorityCorrection(
  * @throws {Error} when the request fails or the backend returns a non-ok status
  */
 export async function getPriorityCorrectionStats(): Promise<PriorityCorrectionStats> {
-  const response = await fetch(`${API_BASE_URL}/todos/priority-corrections/stats`);
-  return await handleResponse<PriorityCorrectionStats>(response);
+  const response = await fetch(`${API_BASE_URL}/todos/priority-corrections/stats`)
+  return await handleResponse<PriorityCorrectionStats>(response)
 }
 
 // --- CSV Download API Calls ---
@@ -269,10 +272,10 @@ export async function getPriorityCorrectionStats(): Promise<PriorityCorrectionSt
  * @throws {Error} when the request fails or the backend returns a non-ok status
  */
 export async function downloadTodosCsv(): Promise<Blob> {
-  const response = await fetch(`${API_BASE_URL}/csv-downloads/todos`);
+  const response = await fetch(`${API_BASE_URL}/csv-downloads/todos`)
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(errorText || `CSV download failed with status ${response.status}`);
+    const errorText = await response.text()
+    throw new Error(errorText || `CSV download failed with status ${response.status}`)
   }
-  return await response.blob();
+  return await response.blob()
 }

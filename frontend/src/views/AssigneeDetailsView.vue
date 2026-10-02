@@ -1,92 +1,94 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getAssignee, updateAssignee, deleteAssignee } from '@/services/apiService';
-import AssigneeForm from '@/components/AssigneeForm.vue';
-import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee';
-import { showToast, Toast } from '@/ts/toasts';
-import { Button } from 'agnostic-vue';
+import { ref, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getAssignee, updateAssignee, deleteAssignee } from '@/services/apiService'
+import AssigneeForm from '@/components/AssigneeForm.vue'
+import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee'
+import { showToast, Toast } from '@/ts/toasts'
+import { Button } from 'agnostic-vue'
 
-const route = useRoute();
-const router = useRouter();
-const assignee = ref<Assignee | null>(null);
-const isLoading = ref<boolean>(true);
-const isEditing = ref<boolean>(false);
-const showDeleteConfirm = ref<boolean>(false);
+const route = useRoute()
+const router = useRouter()
+const assignee = ref<Assignee | null>(null)
+const isLoading = ref<boolean>(true)
+const isEditing = ref<boolean>(false)
+const showDeleteConfirm = ref<boolean>(false)
 
-const assigneeId = ref<number>(Number(route.params.id));
+const assigneeId = ref<number>(Number(route.params.id))
 
 // Ruft die Details des Zuständigen vom Backend ab.
 async function fetchAssignee() {
-  isLoading.value = true;
+  isLoading.value = true
   try {
-    assignee.value = await getAssignee(assigneeId.value);
+    assignee.value = await getAssignee(assigneeId.value)
   } catch (error) {
-    console.error('Error fetching assignee:', error);
-    showToast(new Toast('Error', 'Failed to load assignee details. Please try again later.', 'error'));
-    assignee.value = null; // Ensure it's null if not found or error
+    console.error('Error fetching assignee:', error)
+    showToast(
+      new Toast('Error', 'Failed to load assignee details. Please try again later.', 'error')
+    )
+    assignee.value = null // Ensure it's null if not found or error
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
 // Aktualisiert die Daten des Zuständigen im Backend.
 async function handleUpdate(updatedAssignee: AssigneeCreateUpdate) {
   try {
-    await updateAssignee(assigneeId.value, updatedAssignee);
-    showToast(new Toast('Success', 'Assignee updated successfully!', 'success'));
-    isEditing.value = false;
-    await fetchAssignee(); // Refresh details
+    await updateAssignee(assigneeId.value, updatedAssignee)
+    showToast(new Toast('Success', 'Assignee updated successfully!', 'success'))
+    isEditing.value = false
+    await fetchAssignee() // Refresh details
   } catch (error) {
-    console.error('Error updating assignee:', error);
-    showToast(new Toast('Error', 'Failed to update assignee.', 'error'));
+    console.error('Error updating assignee:', error)
+    showToast(new Toast('Error', 'Failed to update assignee.', 'error'))
   }
 }
 
 // Öffnet den In-App-Bestätigungsdialog zum Löschen.
 function requestDelete() {
-  showDeleteConfirm.value = true;
+  showDeleteConfirm.value = true
 }
 
 // Bricht das Löschen ab und schließt den Bestätigungsdialog.
 function cancelDelete() {
-  showDeleteConfirm.value = false;
+  showDeleteConfirm.value = false
 }
 
 // Löscht den Zuständigen nach Bestätigung.
 async function confirmDelete() {
-  showDeleteConfirm.value = false;
+  showDeleteConfirm.value = false
   try {
-    await deleteAssignee(assigneeId.value);
-    showToast(new Toast('Success', 'Assignee deleted successfully!', 'success'));
-    router.push('/assignees'); // Go back to list
+    await deleteAssignee(assigneeId.value)
+    showToast(new Toast('Success', 'Assignee deleted successfully!', 'success'))
+    router.push('/assignees') // Go back to list
   } catch (error: unknown) {
-    console.error('Error deleting assignee:', error);
-    const message = error instanceof Error ? error.message : String(error);
-    showToast(new Toast('Error', `Failed to delete assignee: ${message}`, 'error'));
+    console.error('Error deleting assignee:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    showToast(new Toast('Error', `Failed to delete assignee: ${message}`, 'error'))
   }
 }
 
 // Aktiviert den Bearbeitungsmodus.
 function startEditing() {
-  isEditing.value = true;
+  isEditing.value = true
 }
 
 // Deaktiviert den Bearbeitungsmodus.
 function cancelEditing() {
-  isEditing.value = false;
+  isEditing.value = false
 }
 
 // Watch for changes in route params (e.g., id) to re-fetch data
 watch(
   () => route.params.id,
   (newId) => {
-    assigneeId.value = Number(newId);
-    fetchAssignee();
-  },
-);
+    assigneeId.value = Number(newId)
+    fetchAssignee()
+  }
+)
 
-onMounted(fetchAssignee);
+onMounted(fetchAssignee)
 </script>
 
 <template>
@@ -118,9 +120,16 @@ onMounted(fetchAssignee);
 
     <!-- In-app delete confirmation dialog -->
     <div v-if="showDeleteConfirm" class="modal-overlay" @click.self="cancelDelete">
-      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="confirm-delete-detail-title">
+      <div
+        class="modal card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-delete-detail-title"
+      >
         <h3 id="confirm-delete-detail-title" class="modal-title">Delete this assignee?</h3>
-        <p class="modal-text">This will remove the assignee from all associated todos. This action cannot be undone.</p>
+        <p class="modal-text">
+          This will remove the assignee from all associated todos. This action cannot be undone.
+        </p>
         <div class="modal-actions">
           <Button mode="secondary" @click="cancelDelete">Cancel</Button>
           <Button mode="danger" @click="confirmDelete">Delete</Button>

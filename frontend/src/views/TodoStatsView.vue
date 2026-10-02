@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import type { TodoStats } from '@/types/todoStats';
-import { getTodoStats, getPriorityCorrectionStats } from '@/services/apiService';
-import type { PriorityCorrectionStats } from '@/types/priorityCorrections';
-import { showToast, Toast } from '@/ts/toasts';
-import { Button } from 'agnostic-vue';
+import { ref, computed, onMounted } from 'vue'
+import type { TodoStats } from '@/types/todoStats'
+import { getTodoStats, getPriorityCorrectionStats } from '@/services/apiService'
+import type { PriorityCorrectionStats } from '@/types/priorityCorrections'
+import { showToast, Toast } from '@/ts/toasts'
+import { Button } from 'agnostic-vue'
 
-const stats = ref<TodoStats | null>(null);
-const correctionStats = ref<PriorityCorrectionStats | null>(null);
-const isLoading = ref<boolean>(true);
+const stats = ref<TodoStats | null>(null)
+const correctionStats = ref<PriorityCorrectionStats | null>(null)
+const isLoading = ref<boolean>(true)
 
 // Chart palette taken from the design tokens: one place to theme the charts,
 // and the palette stays readable with red-green colour blindness (Okabe-Ito).
@@ -20,28 +20,28 @@ const PIE_COLORS = [
   'var(--color-chart-series-3)',
   'var(--color-chart-series-4)',
   'var(--color-chart-series-5)',
-  'var(--color-chart-series-6)',
-];
+  'var(--color-chart-series-6)'
+]
 
 // Priority bars are coloured by the priority name instead of the row order, so
 // a missing priority cannot shift the colours of the remaining bars.
 const PRIORITY_BAR_COLORS: Record<string, string> = {
   HIGH: 'var(--color-chart-series-6)',
   MEDIUM: 'var(--color-chart-series-1)',
-  LOW: 'var(--color-chart-series-3)',
-};
-const DEFAULT_BAR_COLOR = 'var(--color-chart-series-4)';
+  LOW: 'var(--color-chart-series-3)'
+}
+const DEFAULT_BAR_COLOR = 'var(--color-chart-series-4)'
 
 // Bar-chart geometry: the SVG viewBox the bars are laid out in.
-const BAR_WIDTH = 480;
-const BAR_HEIGHT = 200;
+const BAR_WIDTH = 480
+const BAR_HEIGHT = 200
 
-const priorityEntries = computed(() => Object.entries(stats.value?.todosPerPriority ?? {}));
-const categoryEntries = computed(() => Object.entries(stats.value?.todosPerCategory ?? {}));
-const assigneeEntries = computed(() => stats.value?.todosPerAssignee ?? []);
+const priorityEntries = computed(() => Object.entries(stats.value?.todosPerPriority ?? {}))
+const categoryEntries = computed(() => Object.entries(stats.value?.todosPerCategory ?? {}))
+const assigneeEntries = computed(() => stats.value?.todosPerAssignee ?? [])
 
-const maxPriorityCount = computed(() => Math.max(1, ...priorityEntries.value.map(([, c]) => c)));
-const maxAssigneeCount = computed(() => Math.max(1, ...assigneeEntries.value.map((a) => a.count)));
+const maxPriorityCount = computed(() => Math.max(1, ...priorityEntries.value.map(([, c]) => c)))
+const maxAssigneeCount = computed(() => Math.max(1, ...assigneeEntries.value.map((a) => a.count)))
 
 /**
  * Computes SVG arc path data for one pie slice.
@@ -53,28 +53,34 @@ const maxAssigneeCount = computed(() => Math.max(1, ...assigneeEntries.value.map
  * @param endAngle - slice end in radians
  * @returns an SVG `d` attribute describing the wedge
  */
-function pieSlicePath(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+function pieSlicePath(
+  cx: number,
+  cy: number,
+  r: number,
+  startAngle: number,
+  endAngle: number
+): string {
   // Full-circle case would collapse to a zero-length arc; draw two halves instead.
   if (endAngle - startAngle >= Math.PI * 2 - 1e-6) {
-    return `M ${cx} ${cy} L ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} Z`;
+    return `M ${cx} ${cy} L ${cx + r} ${cy} A ${r} ${r} 0 1 1 ${cx - r} ${cy} A ${r} ${r} 0 1 1 ${cx + r} ${cy} Z`
   }
-  const x1 = cx + r * Math.cos(startAngle);
-  const y1 = cy + r * Math.sin(startAngle);
-  const x2 = cx + r * Math.cos(endAngle);
-  const y2 = cy + r * Math.sin(endAngle);
-  const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
-  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  const x1 = cx + r * Math.cos(startAngle)
+  const y1 = cy + r * Math.sin(startAngle)
+  const x2 = cx + r * Math.cos(endAngle)
+  const y2 = cy + r * Math.sin(endAngle)
+  const largeArc = endAngle - startAngle > Math.PI ? 1 : 0
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`
 }
 
 const pieSlices = computed(() => {
-  const total = categoryEntries.value.reduce((sum, [, count]) => sum + count, 0);
-  let angle = -Math.PI / 2; // start at 12 o'clock
+  const total = categoryEntries.value.reduce((sum, [, count]) => sum + count, 0)
+  let angle = -Math.PI / 2 // start at 12 o'clock
   return categoryEntries.value.map(([label, count], index) => {
-    const sweep = total === 0 ? 0 : (count / total) * Math.PI * 2;
-    const path = pieSlicePath(100, 100, 80, angle, angle + sweep);
-    const start = angle;
-    angle += sweep;
-    const mid = start + sweep / 2;
+    const sweep = total === 0 ? 0 : (count / total) * Math.PI * 2
+    const path = pieSlicePath(100, 100, 80, angle, angle + sweep)
+    const start = angle
+    angle += sweep
+    const mid = start + sweep / 2
     return {
       label,
       count,
@@ -82,32 +88,32 @@ const pieSlices = computed(() => {
       path,
       color: PIE_COLORS[index % PIE_COLORS.length],
       labelX: 100 + 95 * Math.cos(mid),
-      labelY: 100 + 95 * Math.sin(mid),
-    };
-  });
-});
+      labelY: 100 + 95 * Math.sin(mid)
+    }
+  })
+})
 
 // Fetches the statistics from the backend and clears the loading state.
 async function fetchStats() {
-  isLoading.value = true;
+  isLoading.value = true
   try {
     const [todoStats, corrections] = await Promise.all([
       getTodoStats(),
-      getPriorityCorrectionStats().catch(() => null),
-    ]);
-    stats.value = todoStats;
+      getPriorityCorrectionStats().catch(() => null)
+    ])
+    stats.value = todoStats
     // Corrections stats are a nice-to-have; a failure there must not blank
     // out the whole page, hence the swallowed rejection above.
-    correctionStats.value = corrections;
+    correctionStats.value = corrections
   } catch (error) {
-    console.error('Error fetching todo stats:', error);
-    showToast(new Toast('Error', 'Failed to load statistics.', 'error'));
+    console.error('Error fetching todo stats:', error)
+    showToast(new Toast('Error', 'Failed to load statistics.', 'error'))
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
-onMounted(fetchStats);
+onMounted(fetchStats)
 </script>
 
 <template>
@@ -167,7 +173,11 @@ onMounted(fetchStats);
                 rx="4"
                 fill="var(--color-chart-series-5)"
               />
-              <text :x="156 + (entry.count / maxAssigneeCount) * (BAR_WIDTH - 190)" :y="index * 36 + 19" class="bar-value">
+              <text
+                :x="156 + (entry.count / maxAssigneeCount) * (BAR_WIDTH - 190)"
+                :y="index * 36 + 19"
+                class="bar-value"
+              >
                 {{ entry.count }}
               </text>
             </g>
@@ -195,7 +205,11 @@ onMounted(fetchStats);
                 rx="4"
                 :fill="PRIORITY_BAR_COLORS[entry[0]] ?? DEFAULT_BAR_COLOR"
               />
-              <text :x="118 + (entry[1] / maxPriorityCount) * (BAR_WIDTH - 160)" :y="index * 44 + 22" class="bar-value">
+              <text
+                :x="118 + (entry[1] / maxPriorityCount) * (BAR_WIDTH - 160)"
+                :y="index * 44 + 22"
+                class="bar-value"
+              >
                 {{ entry[1] }}
               </text>
             </g>
@@ -240,11 +254,17 @@ onMounted(fetchStats);
           <h2 class="chart-title">Priority Corrections (Classifier Feedback)</h2>
           <template v-if="correctionStats && correctionStats.totalCorrections > 0">
             <p class="corrections-total">
-              {{ correctionStats.totalCorrections }} correction{{ correctionStats.totalCorrections === 1 ? '' : 's' }} recorded
+              {{ correctionStats.totalCorrections }} correction{{
+                correctionStats.totalCorrections === 1 ? '' : 's'
+              }}
+              recorded
             </p>
             <table class="corrections-table">
               <thead>
-                <tr><th>Predicted → Corrected</th><th>Count</th></tr>
+                <tr>
+                  <th>Predicted → Corrected</th>
+                  <th>Count</th>
+                </tr>
               </thead>
               <tbody>
                 <tr v-for="(count, transition) in correctionStats.transitions" :key="transition">
@@ -255,8 +275,8 @@ onMounted(fetchStats);
             </table>
           </template>
           <p v-else class="chart-empty">
-            No corrections recorded yet. Use the thumbs-down on a todo card to tell us
-            when the predicted priority is wrong.
+            No corrections recorded yet. Use the thumbs-down on a todo card to tell us when the
+            predicted priority is wrong.
           </p>
         </section>
       </div>

@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import type { Assignee } from '@/types/assignee';
-import { Button } from 'agnostic-vue';
+import type { Assignee } from '@/types/assignee'
+import { Button } from 'agnostic-vue'
 
 const props = defineProps<{
-  assignees: Assignee[];
-}>();
+  assignees: Assignee[]
+}>()
 
-const emit = defineEmits(['edit', 'delete', 'details']);
+const emit = defineEmits(['edit', 'delete', 'details'])
 
 // Emittiert das 'edit'-Event mit der ID des Zuständigen.
 function handleEdit(id: number) {
-  emit('edit', id);
+  emit('edit', id)
 }
 
 // Emittiert das 'delete'-Event mit der ID des Zuständigen.
 function handleDelete(id: number) {
-  emit('delete', id);
+  emit('delete', id)
 }
 
 // Emittiert das 'details'-Event mit der ID des Zuständigen.
 function handleDetails(id: number) {
-  emit('details', id);
+  emit('details', id)
 }
 </script>
 
@@ -62,7 +62,8 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+th,
+td {
   border: 1px solid var(--color-border);
   padding: 8px;
   text-align: left;

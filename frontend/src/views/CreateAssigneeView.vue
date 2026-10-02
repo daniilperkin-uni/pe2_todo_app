@@ -1,31 +1,31 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { createAssignee } from '@/services/apiService';
-import AssigneeForm from '@/components/AssigneeForm.vue';
-import type { AssigneeCreateUpdate } from '@/types/assignee';
-import { showToast, Toast } from '@/ts/toasts';
+import { useRouter } from 'vue-router'
+import { createAssignee } from '@/services/apiService'
+import AssigneeForm from '@/components/AssigneeForm.vue'
+import type { AssigneeCreateUpdate } from '@/types/assignee'
+import { showToast, Toast } from '@/ts/toasts'
 
-const router = useRouter();
+const router = useRouter()
 
 // Verarbeitet das Absenden des Formulars und erstellt einen Zuständigen.
 async function handleSubmit(assignee: AssigneeCreateUpdate) {
   try {
-    await createAssignee(assignee);
-    showToast(new Toast('Success', 'Assignee created successfully!', 'success'));
-    router.push('/assignees');
+    await createAssignee(assignee)
+    showToast(new Toast('Success', 'Assignee created successfully!', 'success'))
+    router.push('/assignees')
   } catch (error) {
-    console.error('Error creating assignee:', error);
+    console.error('Error creating assignee:', error)
     // Surface the server message: the backend answers with an RFC-7807 body
     // (e.g. the required uni-stuttgart.de email domain), which is far more
     // useful than a generic failure text.
-    const message = error instanceof Error ? error.message : String(error);
-    showToast(new Toast('Error', `Failed to create assignee: ${message}`, 'error'));
+    const message = error instanceof Error ? error.message : String(error)
+    showToast(new Toast('Error', `Failed to create assignee: ${message}`, 'error'))
   }
 }
 
 // Leitet den Benutzer zur Zuständigen-Übersichtsseite um.
 function handleCancel() {
-  router.push('/assignees');
+  router.push('/assignees')
 }
 </script>
 

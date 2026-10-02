@@ -4,7 +4,7 @@ import {
   endOfWeek,
   isOverdue,
   matchesDueFilter,
-  parseIsoDate,
+  parseIsoDate
 } from './dueDateFilters'
 import type { Todo } from '@/types/todo'
 
@@ -24,7 +24,7 @@ function makeTodo(overrides: Partial<Todo> = {}): Todo {
     dueDate: '2024-06-12',
     finishedDate: '',
     recurrenceRule: 'NONE',
-    ...overrides,
+    ...overrides
   }
 }
 
@@ -102,7 +102,9 @@ describe('matchesDueFilter', () => {
 
   it('matches unfinished past-due todos for "overdue"', () => {
     expect(matchesDueFilter(makeTodo({ dueDate: '2024-06-11' }), 'overdue', TODAY)).toBe(true)
-    expect(matchesDueFilter(makeTodo({ dueDate: '2024-06-11', finished: true }), 'overdue', TODAY)).toBe(false)
+    expect(
+      matchesDueFilter(makeTodo({ dueDate: '2024-06-11', finished: true }), 'overdue', TODAY)
+    ).toBe(false)
     expect(matchesDueFilter(makeTodo({ dueDate: '2024-06-12' }), 'overdue', TODAY)).toBe(false)
   })
 })
@@ -113,7 +115,7 @@ describe('applyDueFilter', () => {
       makeTodo({ id: 1, dueDate: '2024-06-11' }),
       makeTodo({ id: 2, dueDate: '2024-06-12' }),
       makeTodo({ id: 3, dueDate: '2024-06-15' }),
-      makeTodo({ id: 4, dueDate: '', title: 'No date' }),
+      makeTodo({ id: 4, dueDate: '', title: 'No date' })
     ]
     const overdue = applyDueFilter(todos, 'overdue', TODAY)
     expect(overdue.map((t) => t.id)).toEqual([1])

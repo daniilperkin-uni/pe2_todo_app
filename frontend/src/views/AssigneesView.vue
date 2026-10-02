@@ -1,72 +1,72 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import type { Assignee } from '@/types/assignee';
-import { getAssignees, deleteAssignee } from '@/services/apiService';
-import AssigneeList from '@/components/AssigneeList.vue';
-import { showToast, Toast } from '@/ts/toasts';
-import { Button } from 'agnostic-vue';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import type { Assignee } from '@/types/assignee'
+import { getAssignees, deleteAssignee } from '@/services/apiService'
+import AssigneeList from '@/components/AssigneeList.vue'
+import { showToast, Toast } from '@/ts/toasts'
+import { Button } from 'agnostic-vue'
 
-const router = useRouter();
-const assignees = ref<Assignee[]>([]);
-const isLoading = ref<boolean>(true);
-const assigneeToDelete = ref<number | null>(null);
+const router = useRouter()
+const assignees = ref<Assignee[]>([])
+const isLoading = ref<boolean>(true)
+const assigneeToDelete = ref<number | null>(null)
 
 // Ruft alle Zuständigen vom Backend ab.
 async function fetchAssignees() {
-  isLoading.value = true;
+  isLoading.value = true
   try {
-    assignees.value = await getAssignees();
+    assignees.value = await getAssignees()
   } catch (error) {
-    console.error('Error fetching assignees:', error);
-    showToast(new Toast('Error', 'Failed to load assignees. Please try again later.', 'error'));
+    console.error('Error fetching assignees:', error)
+    showToast(new Toast('Error', 'Failed to load assignees. Please try again later.', 'error'))
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
 // Öffnet den In-App-Bestätigungsdialog zum Löschen.
 function requestDelete(id: number) {
-  assigneeToDelete.value = id;
+  assigneeToDelete.value = id
 }
 
 // Bricht das Löschen ab und schließt den Bestätigungsdialog.
 function cancelDelete() {
-  assigneeToDelete.value = null;
+  assigneeToDelete.value = null
 }
 
 // Bestätigt das Löschen eines Zuständigen und aktualisiert die Liste.
 async function confirmDelete() {
-  const id = assigneeToDelete.value;
-  if (id === null) return;
-  assigneeToDelete.value = null;
+  const id = assigneeToDelete.value
+  if (id === null) return
+  assigneeToDelete.value = null
   try {
-    await deleteAssignee(id);
-    showToast(new Toast('Success', 'Assignee deleted successfully.', 'success'));
-    await fetchAssignees(); // Refresh the list
+    await deleteAssignee(id)
+    showToast(new Toast('Success', 'Assignee deleted successfully.', 'success'))
+    await fetchAssignees() // Refresh the list
   } catch (error: unknown) {
-    console.error('Error deleting assignee:', error);
-    const message = error instanceof Error ? error.message : String(error);
-    showToast(new Toast('Error', `Failed to delete assignee: ${message}`, 'error'));
+    console.error('Error deleting assignee:', error)
+    const message = error instanceof Error ? error.message : String(error)
+    showToast(new Toast('Error', `Failed to delete assignee: ${message}`, 'error'))
   }
 }
 
 // Navigiert zur Bearbeitungsseite des Zuständigen.
 function handleEdit(id: number) {
-  router.push(`/assignees/${id}/edit`);
+  router.push(`/assignees/${id}/edit`)
 }
 
 // Navigiert zur Detailseite des Zuständigen.
 function handleDetails(id: number) {
-  router.push(`/assignees/${id}`);
+  router.push(`/assignees/${id}`)
 }
 
 // Navigiert zur Seite zum Erstellen eines neuen Zuständigen.
 function createNewAssignee() {
-  router.push('/create-assignee');
+  router.push('/create-assignee')
 }
 
-onMounted(fetchAssignees);
+onMounted(fetchAssignees)
 </script>
 
 <template>
@@ -93,9 +93,16 @@ onMounted(fetchAssignees);
 
     <!-- In-app delete confirmation dialog -->
     <div v-if="assigneeToDelete !== null" class="modal-overlay" @click.self="cancelDelete">
-      <div class="modal card" role="dialog" aria-modal="true" aria-labelledby="confirm-delete-assignee-title">
+      <div
+        class="modal card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-delete-assignee-title"
+      >
         <h3 id="confirm-delete-assignee-title" class="modal-title">Delete this assignee?</h3>
-        <p class="modal-text">This will remove the assignee from all associated todos. This action cannot be undone.</p>
+        <p class="modal-text">
+          This will remove the assignee from all associated todos. This action cannot be undone.
+        </p>
         <div class="modal-actions">
           <Button mode="secondary" @click="cancelDelete">Cancel</Button>
           <Button mode="danger" @click="confirmDelete">Delete</Button>

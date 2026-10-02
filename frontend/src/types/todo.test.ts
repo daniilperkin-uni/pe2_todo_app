@@ -9,7 +9,7 @@ describe('Todo type contracts', () => {
       id: 1,
       prename: 'John',
       name: 'Doe',
-      email: 'john@example.com',
+      email: 'john@example.com'
     }
 
     const todo: Todo = {
@@ -24,7 +24,7 @@ describe('Todo type contracts', () => {
       createdDate: '2024-01-01',
       dueDate: '2024-12-31',
       finishedDate: '',
-      category: 'work',
+      category: 'work'
     }
 
     expect(todo.id).toBe(1)
@@ -50,7 +50,7 @@ describe('Todo type contracts', () => {
       finished: false,
       priority: 'MEDIUM',
       dueDate: '2024-12-31',
-      assigneeIdList: [1, 2, 3],
+      assigneeIdList: [1, 2, 3]
     }
 
     expect(createDto.title).toBe('New Todo')
@@ -70,7 +70,7 @@ describe('Todo type contracts', () => {
       assigneeList: [],
       createdDate: '2024-01-01',
       dueDate: '2024-12-31',
-      finishedDate: '',
+      finishedDate: ''
     }
     expect(todo.category).toBeUndefined()
   })
@@ -82,7 +82,7 @@ describe('Assignee type contracts', () => {
       id: 1,
       prename: 'Jane',
       name: 'Smith',
-      email: 'jane@example.com',
+      email: 'jane@example.com'
     }
     expect(assignee.id).toBe(1)
     expect(assignee.email).toContain('@')
@@ -92,7 +92,7 @@ describe('Assignee type contracts', () => {
     const dto = {
       prename: 'Jane',
       name: 'Smith',
-      email: 'jane@example.com',
+      email: 'jane@example.com'
     }
     expect(dto.prename).toBe('Jane')
     expect(dto.name).toBe('Smith')
@@ -115,4 +115,3 @@ describe('Toast utility tests', () => {
     expect(activeToasts.value.some((t) => t.title === 'Test Title')).toBe(false)
   })
 })
-

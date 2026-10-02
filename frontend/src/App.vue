@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { RouterView, RouterLink } from 'vue-router';
-import { Close, Toast, Toasts } from 'agnostic-vue';
-import { activeToasts } from '@/ts/toasts';
+import { RouterView, RouterLink } from 'vue-router'
+import { Close, Toast, Toasts } from 'agnostic-vue'
+import { activeToasts } from '@/ts/toasts'
 
-import 'agnostic-vue/dist/common.min.css';
-import 'agnostic-vue/dist/index.css';
+import 'agnostic-vue/dist/common.min.css'
+import 'agnostic-vue/dist/index.css'
 </script>
 
 <template>
@@ -127,7 +127,9 @@ import 'agnostic-vue/dist/index.css';
   text-decoration: none;
   padding: var(--space-sm) 0;
   border-bottom: 2px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
 }
 
 .main-nav a:hover {

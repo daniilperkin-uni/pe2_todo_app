@@ -1,52 +1,52 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import type { Todo } from '@/types/todo';
-import { isOverdue } from '@/ts/dueDateFilters';
-import { Button } from 'agnostic-vue';
+import { computed } from 'vue'
+import type { Todo } from '@/types/todo'
+import { isOverdue } from '@/ts/dueDateFilters'
+import { Button } from 'agnostic-vue'
 
 const props = defineProps<{
-  todo: Todo;
-}>();
+  todo: Todo
+}>()
 
-const emit = defineEmits(['toggle-finished', 'edit', 'delete', 'report-priority']);
+const emit = defineEmits(['toggle-finished', 'edit', 'delete', 'report-priority'])
 
-const overdue = computed(() => isOverdue(props.todo));
+const overdue = computed(() => isOverdue(props.todo))
 
 const priorityClass = computed(() => {
   switch (props.todo.priority) {
     case 'LOW':
-      return 'priority-low';
+      return 'priority-low'
     case 'MEDIUM':
-      return 'priority-medium';
+      return 'priority-medium'
     case 'HIGH':
-      return 'priority-high';
+      return 'priority-high'
     default:
-      return '';
+      return ''
   }
-});
+})
 
 const assigneeNames = computed(() => {
   if (!props.todo.assigneeList || props.todo.assigneeList.length === 0) {
-    return 'Not assigned';
+    return 'Not assigned'
   }
-  return props.todo.assigneeList.map((a) => `${a.prename} ${a.name}`).join(', ');
-});
+  return props.todo.assigneeList.map((a) => `${a.prename} ${a.name}`).join(', ')
+})
 
 function handleToggleFinished() {
-  emit('toggle-finished', props.todo.id, !props.todo.finished);
+  emit('toggle-finished', props.todo.id, !props.todo.finished)
 }
 
 function handleEdit() {
-  emit('edit', props.todo.id);
+  emit('edit', props.todo.id)
 }
 
 function handleDelete() {
-  emit('delete', props.todo.id);
+  emit('delete', props.todo.id)
 }
 
 // Signals that the user rejects the predicted priority of this todo.
 function handleReportPriority() {
-  emit('report-priority', props.todo);
+  emit('report-priority', props.todo)
 }
 </script>
 
@@ -102,7 +102,9 @@ function handleReportPriority() {
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
 }
 
 .todo-card:hover {

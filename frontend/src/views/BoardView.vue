@@ -1,49 +1,49 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import type { Todo, TodoStatus } from '@/types/todo';
-import { getTodos, transitionTodoStatus } from '@/services/apiService';
-import { showToast, Toast } from '@/ts/toasts';
-import { isOverdue } from '@/ts/dueDateFilters';
-import { Button } from 'agnostic-vue';
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import type { Todo, TodoStatus } from '@/types/todo'
+import { getTodos, transitionTodoStatus } from '@/services/apiService'
+import { showToast, Toast } from '@/ts/toasts'
+import { isOverdue } from '@/ts/dueDateFilters'
+import { Button } from 'agnostic-vue'
 
-const router = useRouter();
-const todos = ref<Todo[]>([]);
-const isLoading = ref<boolean>(true);
+const router = useRouter()
+const todos = ref<Todo[]>([])
+const isLoading = ref<boolean>(true)
 
 // Id of the todo currently dragged; null while nothing is being dragged.
-const draggedTodoId = ref<number | null>(null);
+const draggedTodoId = ref<number | null>(null)
 // Column that is the current drop target, used for the drop-zone highlight.
-const dropTargetStatus = ref<TodoStatus | null>(null);
+const dropTargetStatus = ref<TodoStatus | null>(null)
 
 const columns: { status: TodoStatus; label: string }[] = [
   { status: 'OPEN', label: 'Open' },
   { status: 'IN_PROGRESS', label: 'In Progress' },
-  { status: 'DONE', label: 'Done' },
-];
+  { status: 'DONE', label: 'Done' }
+]
 
 const todosByStatus = computed<Record<TodoStatus, Todo[]>>(() => {
   const grouped: Record<TodoStatus, Todo[]> = {
     OPEN: [],
     IN_PROGRESS: [],
-    DONE: [],
-  };
-  for (const todo of todos.value) {
-    grouped[todo.status]?.push(todo);
+    DONE: []
   }
-  return grouped;
-});
+  for (const todo of todos.value) {
+    grouped[todo.status]?.push(todo)
+  }
+  return grouped
+})
 
 // Fetches all todos from the backend and clears the loading state.
 async function fetchTodos() {
-  isLoading.value = true;
+  isLoading.value = true
   try {
-    todos.value = await getTodos();
+    todos.value = await getTodos()
   } catch (error) {
-    console.error('Error fetching todos:', error);
-    showToast(new Toast('Error', 'Failed to load todos. Please try again later.', 'error'));
+    console.error('Error fetching todos:', error)
+    showToast(new Toast('Error', 'Failed to load todos. Please try again later.', 'error'))
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
@@ -54,19 +54,19 @@ async function fetchTodos() {
  * @param todo - the todo attached to the dragged card
  */
 function handleDragStart(event: DragEvent, todo: Todo) {
-  draggedTodoId.value = todo.id;
+  draggedTodoId.value = todo.id
   if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.effectAllowed = 'move'
     // Text payload as fallback for browsers that do not expose custom types
     // to the drop target during dragover.
-    event.dataTransfer.setData('text/plain', String(todo.id));
+    event.dataTransfer.setData('text/plain', String(todo.id))
   }
 }
 
 // Clears the drag state when the drag gesture ends without a drop.
 function handleDragEnd() {
-  draggedTodoId.value = null;
-  dropTargetStatus.value = null;
+  draggedTodoId.value = null
+  dropTargetStatus.value = null
 }
 
 /**
@@ -76,18 +76,18 @@ function handleDragEnd() {
  * @param status - the column the pointer is over
  */
 function handleDragOver(event: DragEvent, status: TodoStatus) {
-  if (draggedTodoId.value === null) return;
-  event.preventDefault();
+  if (draggedTodoId.value === null) return
+  event.preventDefault()
   if (event.dataTransfer) {
-    event.dataTransfer.dropEffect = 'move';
+    event.dataTransfer.dropEffect = 'move'
   }
-  dropTargetStatus.value = status;
+  dropTargetStatus.value = status
 }
 
 // Removes the column highlight when the card leaves the drop zone.
 function handleDragLeave(status: TodoStatus) {
   if (dropTargetStatus.value === status) {
-    dropTargetStatus.value = null;
+    dropTargetStatus.value = null
   }
 }
 
@@ -101,43 +101,49 @@ function handleDragLeave(status: TodoStatus) {
  * @param status - the column the card was dropped into
  */
 async function handleDrop(event: DragEvent, status: TodoStatus) {
-  event.preventDefault();
-  dropTargetStatus.value = null;
+  event.preventDefault()
+  dropTargetStatus.value = null
 
-  let todoId = draggedTodoId.value;
+  let todoId = draggedTodoId.value
   if (todoId === null && event.dataTransfer) {
     // Fallback for the text/plain payload set in handleDragStart.
-    const raw = event.dataTransfer.getData('text/plain');
-    todoId = raw ? Number(raw) : null;
+    const raw = event.dataTransfer.getData('text/plain')
+    todoId = raw ? Number(raw) : null
   }
-  draggedTodoId.value = null;
-  if (todoId === null || Number.isNaN(todoId)) return;
+  draggedTodoId.value = null
+  if (todoId === null || Number.isNaN(todoId)) return
 
-  const todo = todos.value.find((t) => t.id === todoId);
-  if (!todo || todo.status === status) return;
+  const todo = todos.value.find((t) => t.id === todoId)
+  if (!todo || todo.status === status) return
 
-  const originalStatus = todo.status;
-  todo.status = status;
+  const originalStatus = todo.status
+  todo.status = status
   try {
-    await transitionTodoStatus(todoId, status);
-    showToast(new Toast('Success', `"${todo.title}" moved to ${status.replace('_', ' ').toLowerCase()}.`, 'success'));
-    await fetchTodos();
+    await transitionTodoStatus(todoId, status)
+    showToast(
+      new Toast(
+        'Success',
+        `"${todo.title}" moved to ${status.replace('_', ' ').toLowerCase()}.`,
+        'success'
+      )
+    )
+    await fetchTodos()
   } catch (error) {
-    console.error('Error transitioning todo status:', error);
-    showToast(new Toast('Error', 'Failed to move the todo.', 'error'));
-    todo.status = originalStatus;
+    console.error('Error transitioning todo status:', error)
+    showToast(new Toast('Error', 'Failed to move the todo.', 'error'))
+    todo.status = originalStatus
   }
 }
 
 function handleEdit(id: number) {
-  router.push(`/todos/${id}/edit`);
+  router.push(`/todos/${id}/edit`)
 }
 
 function createNewTodo() {
-  router.push('/todos/create');
+  router.push('/todos/create')
 }
 
-onMounted(fetchTodos);
+onMounted(fetchTodos)
 </script>
 
 <template>
@@ -152,10 +158,7 @@ onMounted(fetchTodos);
       <section
         v-for="column in columns"
         :key="column.status"
-        :class="[
-          'board-column',
-          { 'drop-target': dropTargetStatus === column.status },
-        ]"
+        :class="['board-column', { 'drop-target': dropTargetStatus === column.status }]"
         :data-status="column.status"
         @dragover="handleDragOver($event, column.status)"
         @dragleave="handleDragLeave(column.status)"
@@ -183,7 +186,9 @@ onMounted(fetchTodos);
               <span v-if="isOverdue(todo)" class="meta-tag overdue-tag">Overdue</span>
             </div>
             <div class="card-actions">
-              <button type="button" class="link-button" @click.stop="handleEdit(todo.id)">Edit</button>
+              <button type="button" class="link-button" @click.stop="handleEdit(todo.id)">
+                Edit
+              </button>
             </div>
           </article>
 

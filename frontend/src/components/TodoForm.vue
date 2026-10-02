@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, watchEffect, onMounted } from 'vue';
-import type { Todo, TodoCreateUpdate, Priority } from '@/types/todo';
-import type { Assignee } from '@/types/assignee';
-import { Button } from 'agnostic-vue';
-import { getAssignees } from '@/services/apiService';
+import { ref, watchEffect, onMounted } from 'vue'
+import type { Todo, TodoCreateUpdate, Priority } from '@/types/todo'
+import type { Assignee } from '@/types/assignee'
+import { Button } from 'agnostic-vue'
+import { getAssignees } from '@/services/apiService'
 
 const props = defineProps<{
-  initialTodo?: Todo; // For editing existing todos
-  isEdit?: boolean;
-}>();
+  initialTodo?: Todo // For editing existing todos
+  isEdit?: boolean
+}>()
 
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel'])
 
 const todoForm = ref<TodoCreateUpdate>({
   title: '',
@@ -19,26 +19,26 @@ const todoForm = ref<TodoCreateUpdate>({
   priority: 'LOW', // Default priority
   dueDate: '',
   assigneeIdList: [],
-  recurrenceRule: 'NONE',
-});
+  recurrenceRule: 'NONE'
+})
 
-const availableAssignees = ref<Assignee[]>([]);
-const isLoadingAssignees = ref<boolean>(true);
-const errors = ref<{ [key: string]: string }>({});
+const availableAssignees = ref<Assignee[]>([])
+const isLoadingAssignees = ref<boolean>(true)
+const errors = ref<{ [key: string]: string }>({})
 
-const priorities: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
+const priorities: Priority[] = ['LOW', 'MEDIUM', 'HIGH']
 
 // Fetches the list of available assignees from the backend.
 async function fetchAssignees() {
-  isLoadingAssignees.value = true;
+  isLoadingAssignees.value = true
   try {
-    availableAssignees.value = await getAssignees();
+    availableAssignees.value = await getAssignees()
   } catch (error) {
-    console.error('Error fetching assignees for form:', error);
+    console.error('Error fetching assignees for form:', error)
     // On error, availableAssignees stays empty so the form shows the
     // "No assignees available." placeholder instead of fabricated data.
   } finally {
-    isLoadingAssignees.value = false;
+    isLoadingAssignees.value = false
   }
 }
 
@@ -51,46 +51,46 @@ watchEffect(() => {
       priority: props.initialTodo.priority,
       dueDate: props.initialTodo.dueDate,
       assigneeIdList: props.initialTodo.assigneeList?.map((a) => a.id) || [],
-      recurrenceRule: props.initialTodo.recurrenceRule ?? 'NONE',
-    };
+      recurrenceRule: props.initialTodo.recurrenceRule ?? 'NONE'
+    }
   }
-});
+})
 
 // Validates the form fields. A due date that was changed must lie strictly in
 // the future to match the backend rule in TodoService.validateDueDate; the due
 // date the todo already carries is accepted so an overdue todo stays editable.
 function validateForm() {
-  errors.value = {};
+  errors.value = {}
   if (!todoForm.value.title) {
-    errors.value.title = 'Title is required.';
+    errors.value.title = 'Title is required.'
   }
-  const unchangedDueDate = props.initialTodo?.dueDate === todoForm.value.dueDate;
+  const unchangedDueDate = props.initialTodo?.dueDate === todoForm.value.dueDate
   if (todoForm.value.dueDate && !unchangedDueDate) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const due = new Date(todoForm.value.dueDate + 'T00:00:00');
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const due = new Date(todoForm.value.dueDate + 'T00:00:00')
     if (isNaN(due.getTime())) {
-      errors.value.dueDate = 'Due date is not a valid date.';
+      errors.value.dueDate = 'Due date is not a valid date.'
     } else if (due.getTime() <= today.getTime()) {
-      errors.value.dueDate = 'Due date must be in the future.';
+      errors.value.dueDate = 'Due date must be in the future.'
     }
   }
-  return Object.keys(errors.value).length === 0;
+  return Object.keys(errors.value).length === 0
 }
 
 // Handles form submission and emits the 'submit' event when validation passes.
 function handleSubmit() {
   if (validateForm()) {
-    emit('submit', todoForm.value);
+    emit('submit', todoForm.value)
   }
 }
 
 // Emits the 'cancel' event.
 function handleCancel() {
-  emit('cancel');
+  emit('cancel')
 }
 
-onMounted(fetchAssignees);
+onMounted(fetchAssignees)
 </script>
 
 <template>
@@ -108,12 +108,7 @@ onMounted(fetchAssignees);
 
     <div class="form-group">
       <label for="dueDate">Due Date:</label>
-      <input
-        type="date"
-        id="dueDate"
-        v-model="todoForm.dueDate"
-        @change="delete errors.dueDate"
-      />
+      <input type="date" id="dueDate" v-model="todoForm.dueDate" @change="delete errors.dueDate" />
       <span v-if="errors.dueDate" class="error-message">{{ errors.dueDate }}</span>
     </div>
 
@@ -132,8 +127,8 @@ onMounted(fetchAssignees);
         <option value="MONTHLY">Monthly</option>
       </select>
       <small class="form-hint">
-        Recurring todos create a fresh copy when finished, due on the next occurrence.
-        Month-end dates roll over (Jan 31 → Feb 28).
+        Recurring todos create a fresh copy when finished, due on the next occurrence. Month-end
+        dates roll over (Jan 31 → Feb 28).
       </small>
     </div>
 

@@ -1,51 +1,52 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
-import type { AssigneeCreateUpdate } from '@/types/assignee';
-import { Button } from 'agnostic-vue';
+import { ref, watchEffect } from 'vue'
+import type { AssigneeCreateUpdate } from '@/types/assignee'
+import { Button } from 'agnostic-vue'
 
 const props = defineProps<{
-  initialAssignee?: AssigneeCreateUpdate; // For editing existing assignees
-  isEdit?: boolean;
-}>();
+  initialAssignee?: AssigneeCreateUpdate // For editing existing assignees
+  isEdit?: boolean
+}>()
 
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel'])
 
 const assigneeForm = ref<AssigneeCreateUpdate>({
   prename: '',
   name: '',
-  email: '',
-});
+  email: ''
+})
 
-const errors = ref<{ [key: string]: string }>({});
+const errors = ref<{ [key: string]: string }>({})
 
 watchEffect(() => {
   if (props.initialAssignee) {
-    assigneeForm.value = { ...props.initialAssignee };
+    assigneeForm.value = { ...props.initialAssignee }
   }
-});
+})
 
 // Mirrors the backend @Pattern on AssigneeCreateUpdateDTO.email so an address
 // without a uni-stuttgart.de domain is rejected in the form instead of only
 // failing server-side after the round trip.
-const UNI_EMAIL_PATTERN = /^[^\s@]+@(stud\.|iste\.|ipvs\.|sec\.)?uni-stuttgart\.de$/;
+const UNI_EMAIL_PATTERN = /^[^\s@]+@(stud\.|iste\.|ipvs\.|sec\.)?uni-stuttgart\.de$/
 
 // Validiert die Formularfelder des Zuständigen.
 function validateForm() {
-  errors.value = {};
+  errors.value = {}
   if (!assigneeForm.value.prename) {
-    errors.value.prename = 'Prename is required.';
+    errors.value.prename = 'Prename is required.'
   }
   if (!assigneeForm.value.name) {
-    errors.value.name = 'Name is required.';
+    errors.value.name = 'Name is required.'
   }
-  const email = assigneeForm.value.email.trim();
+  const email = assigneeForm.value.email.trim()
   if (!email) {
-    errors.value.email = 'Email is required.';
+    errors.value.email = 'Email is required.'
   } else if (!UNI_EMAIL_PATTERN.test(email)) {
-    errors.value.email = 'Email must be a uni-stuttgart.de address, e.g. name@iste.uni-stuttgart.de.';
+    errors.value.email =
+      'Email must be a uni-stuttgart.de address, e.g. name@iste.uni-stuttgart.de.'
   }
 
-  return Object.keys(errors.value).length === 0;
+  return Object.keys(errors.value).length === 0
 }
 
 // Verarbeitet das Absenden des Formulars, trimmt die E-Mail und emittiert das 'submit'-Event.
@@ -53,15 +54,15 @@ function handleSubmit() {
   if (validateForm()) {
     const trimmedAssigneeForm: AssigneeCreateUpdate = {
       ...assigneeForm.value,
-      email: assigneeForm.value.email.trim(),
-    };
-    emit('submit', trimmedAssigneeForm);
+      email: assigneeForm.value.email.trim()
+    }
+    emit('submit', trimmedAssigneeForm)
   }
 }
 
 // Emittiert das 'cancel'-Event.
 function handleCancel() {
-  emit('cancel');
+  emit('cancel')
 }
 </script>
 
@@ -69,7 +70,12 @@ function handleCancel() {
   <form @submit.prevent="handleSubmit" class="assignee-form card border-none">
     <div class="form-group">
       <label for="prename">Prename:</label>
-      <input type="text" id="prename" v-model="assigneeForm.prename" @input="delete errors.prename" />
+      <input
+        type="text"
+        id="prename"
+        v-model="assigneeForm.prename"
+        @input="delete errors.prename"
+      />
       <span v-if="errors.prename" class="error-message">{{ errors.prename }}</span>
     </div>
 
@@ -86,7 +92,9 @@ function handleCancel() {
     </div>
 
     <div class="form-actions">
-      <Button type="submit" mode="primary">{{ isEdit ? 'Update Assignee' : 'Create Assignee' }}</Button>
+      <Button type="submit" mode="primary">{{
+        isEdit ? 'Update Assignee' : 'Create Assignee'
+      }}</Button>
       <Button type="button" mode="secondary" @click="handleCancel">Cancel</Button>
     </div>
   </form>
