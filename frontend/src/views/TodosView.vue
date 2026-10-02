@@ -302,6 +302,7 @@ onMounted(fetchTodos)
           @toggle-finished="handleToggleFinished"
           @edit="handleEdit"
           @delete="requestDelete"
+          @report-priority="openPriorityFeedback"
         />
       </section>
     </div>
