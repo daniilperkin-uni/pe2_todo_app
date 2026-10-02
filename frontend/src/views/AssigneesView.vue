@@ -10,15 +10,18 @@ import { Button } from 'agnostic-vue'
 const router = useRouter()
 const assignees = ref<Assignee[]>([])
 const isLoading = ref<boolean>(true)
+const loadError = ref<boolean>(false)
 const assigneeToDelete = ref<number | null>(null)
 
 // Ruft alle Zuständigen vom Backend ab.
 async function fetchAssignees() {
   isLoading.value = true
+  loadError.value = false
   try {
     assignees.value = await getAssignees()
   } catch (error) {
     console.error('Error fetching assignees:', error)
+    loadError.value = true
     showToast(new Toast('Error', 'Failed to load assignees. Please try again later.', 'error'))
   } finally {
     isLoading.value = false
@@ -78,6 +81,11 @@ onMounted(fetchAssignees)
     </div>
 
     <div v-if="isLoading" class="loading-message card">Loading assignees...</div>
+    <div v-else-if="loadError" class="empty-state card">
+      <p class="empty-state-title">Failed to load assignees</p>
+      <p class="empty-state-text">Please try again later.</p>
+      <Button mode="secondary" @click="fetchAssignees">Retry</Button>
+    </div>
     <div v-else-if="assignees.length === 0" class="empty-state card">
       <p class="empty-state-title">No assignees found</p>
       <p class="empty-state-text">Create an assignee to get started.</p>

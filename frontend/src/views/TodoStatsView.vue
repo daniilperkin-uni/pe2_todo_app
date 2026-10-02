@@ -9,6 +9,7 @@ import { Button } from 'agnostic-vue'
 const stats = ref<TodoStats | null>(null)
 const correctionStats = ref<PriorityCorrectionStats | null>(null)
 const isLoading = ref<boolean>(true)
+const loadError = ref<boolean>(false)
 
 // Chart palette taken from the design tokens: one place to theme the charts,
 // and the palette stays readable with red-green colour blindness (Okabe-Ito).
@@ -96,6 +97,7 @@ const pieSlices = computed(() => {
 // Fetches the statistics from the backend and clears the loading state.
 async function fetchStats() {
   isLoading.value = true
+  loadError.value = false
   try {
     const [todoStats, corrections] = await Promise.all([
       getTodoStats(),
@@ -107,6 +109,7 @@ async function fetchStats() {
     correctionStats.value = corrections
   } catch (error) {
     console.error('Error fetching todo stats:', error)
+    loadError.value = true
     showToast(new Toast('Error', 'Failed to load statistics.', 'error'))
   } finally {
     isLoading.value = false
@@ -126,6 +129,11 @@ onMounted(fetchStats)
     </div>
 
     <div v-if="isLoading && !stats" class="loading-message card">Loading statistics...</div>
+
+    <div v-else-if="loadError" class="loading-message card">
+      <p>Failed to load the statistics.</p>
+      <Button mode="secondary" @click="fetchStats">Retry</Button>
+    </div>
 
     <template v-else-if="stats">
       <!-- Headline numbers -->

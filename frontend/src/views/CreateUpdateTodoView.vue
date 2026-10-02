@@ -10,6 +10,7 @@ const route = useRoute()
 const router = useRouter()
 const todo = ref<Todo | null>(null)
 const isLoading = ref<boolean>(true)
+const loadFailed = ref<boolean>(false)
 const isEditMode = ref<boolean>(false)
 
 const todoId = ref<number | null>(null)
@@ -28,19 +29,15 @@ onMounted(() => {
 // Ruft die Details eines ToDos vom Backend ab.
 async function fetchTodo() {
   isLoading.value = true
+  loadFailed.value = false
   try {
     if (todoId.value) {
       todo.value = await getTodo(todoId.value)
     }
   } catch (error) {
     console.error('Error fetching todo:', error)
-    showToast(
-      new Toast(
-        'Error',
-        'Failed to load todo details. Displaying offline data if available.',
-        'error'
-      )
-    )
+    loadFailed.value = true
+    showToast(new Toast('Error', 'Failed to load todo details. Please try again later.', 'error'))
     todo.value = null
   } finally {
     isLoading.value = false
@@ -77,7 +74,9 @@ function handleCancel() {
     <h1 class="heading">{{ isEditMode ? 'Edit Todo' : 'Create New Todo' }}</h1>
 
     <div v-if="isLoading">Loading todo details...</div>
-    <div v-else-if="isEditMode && !todo">Todo not found.</div>
+    <div v-else-if="loadFailed" class="error-message">
+      Failed to load the todo. Please try again later.
+    </div>
     <TodoForm
       v-else
       :initialTodo="todo || undefined"

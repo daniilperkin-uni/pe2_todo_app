@@ -10,6 +10,7 @@ import { Button } from 'agnostic-vue'
 const router = useRouter()
 const todos = ref<Todo[]>([])
 const isLoading = ref<boolean>(true)
+const loadError = ref<boolean>(false)
 
 // Id of the todo currently dragged; null while nothing is being dragged.
 const draggedTodoId = ref<number | null>(null)
@@ -37,10 +38,12 @@ const todosByStatus = computed<Record<TodoStatus, Todo[]>>(() => {
 // Fetches all todos from the backend and clears the loading state.
 async function fetchTodos() {
   isLoading.value = true
+  loadError.value = false
   try {
     todos.value = await getTodos()
   } catch (error) {
     console.error('Error fetching todos:', error)
+    loadError.value = true
     showToast(new Toast('Error', 'Failed to load todos. Please try again later.', 'error'))
   } finally {
     isLoading.value = false
@@ -154,6 +157,10 @@ onMounted(fetchTodos)
     </div>
 
     <div v-if="isLoading" class="loading-message card">Loading board...</div>
+    <div v-else-if="loadError" class="loading-message card">
+      <p>Failed to load the board.</p>
+      <Button mode="secondary" @click="fetchTodos">Retry</Button>
+    </div>
     <div v-else class="board">
       <section
         v-for="column in columns"

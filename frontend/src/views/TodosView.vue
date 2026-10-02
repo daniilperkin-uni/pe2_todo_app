@@ -19,6 +19,7 @@ import type { Priority } from '@/types/todo'
 const router = useRouter()
 const todos = ref<Todo[]>([])
 const isLoading = ref<boolean>(true)
+const loadError = ref<boolean>(false)
 const isDownloadingCsv = ref<boolean>(false)
 // Which representation of the todo list the toggle button links to. The
 // TodosView itself always renders the list; the button switches to the board.
@@ -92,10 +93,12 @@ const sortOptions = [
 // Fetches all todos from the backend and clears the loading state.
 async function fetchTodos() {
   isLoading.value = true
+  loadError.value = false
   try {
     todos.value = await getTodos()
   } catch (error) {
     console.error('Error fetching todos:', error)
+    loadError.value = true
     showToast(new Toast('Error', 'Failed to load todos. Please try again later.', 'error'))
   } finally {
     isLoading.value = false
@@ -112,10 +115,10 @@ async function handleToggleFinished(id: number, finished: boolean) {
     try {
       const updatePayload = {
         title: todoToUpdate.title,
-        description: todoToUpdate.description,
+        description: todoToUpdate.description ?? '',
         finished: finished,
         priority: todoToUpdate.priority,
-        dueDate: todoToUpdate.dueDate,
+        dueDate: todoToUpdate.dueDate ?? '',
         assigneeIdList: todoToUpdate.assigneeList?.map((a) => a.id) || []
       }
       await updateTodo(id, updatePayload)
@@ -269,6 +272,11 @@ onMounted(fetchTodos)
     </div>
 
     <div v-if="isLoading" class="loading-message card">Loading todos...</div>
+    <div v-else-if="loadError" class="empty-state card">
+      <p class="empty-state-title">Failed to load todos</p>
+      <p class="empty-state-text">Please try again later.</p>
+      <Button mode="primary" @click="fetchTodos">Retry</Button>
+    </div>
     <div v-else class="todos-container">
       <section class="todos-section">
         <h2 class="section-title">Open Tasks ({{ openTodos.length }})</h2>
