@@ -110,6 +110,10 @@ import 'agnostic-vue/dist/index.css'
 .logo {
   font-size: 1.5rem;
   font-weight: 600;
+  /* The global h1 margin-bottom (1.5rem) is meant for page headings: flexbox
+     centres the margin box, so it pushed the wordmark 12px above the bar's
+     centre. Zeroing it puts the wordmark and its underline on the axis. */
+  margin: 0;
 }
 
 .logo a {
