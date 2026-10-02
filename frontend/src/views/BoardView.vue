@@ -153,7 +153,10 @@ onMounted(fetchTodos)
   <div class="board-view">
     <div class="view-header">
       <h1 class="heading">Kanban Board</h1>
-      <Button mode="primary" @click="createNewTodo">Create New Todo</Button>
+      <div class="controls">
+        <Button mode="secondary" @click="router.push('/todos')">List View</Button>
+        <Button mode="primary" @click="createNewTodo">Create New Todo</Button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="loading-message card">Loading board...</div>
@@ -218,6 +221,11 @@ onMounted(fetchTodos)
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-xl);
+}
+
+.controls {
+  display: flex;
+  gap: var(--space-md);
 }
 
 .loading-message {
