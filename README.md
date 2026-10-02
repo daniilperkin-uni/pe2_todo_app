@@ -16,6 +16,7 @@ Mit Docker Compose läuft alles inklusive MariaDB mit einem Befehl.
 - Klassifikator: ein PMML-Modell ordnet jedes ToDo `work` oder `private` zu
 - Prioritäts-Feedback: Korrekturen werden gespeichert und ausgewertet
 - Assignee-E-Mails müssen auf eine Uni-Stuttgart-Domain enden (`stud.`, `iste.`, `ipvs.`, `sec.`), geprüft in Backend und Formular
+- Helles und dunkles Design mit Umschalter im Header; ohne eigene Wahl folgt die App der Systemeinstellung
 - Health- und Prometheus-Endpunkte über Spring Boot Actuator
 
 ## Technologien

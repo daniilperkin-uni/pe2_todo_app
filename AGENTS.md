@@ -66,7 +66,7 @@ cd frontend && npm run build         # type-check + vite build
 - `views/` — page-level components (TodosView, CreateUpdateTodoView, BoardView, TodoStatsView, AssigneesView, AssigneeDetailsView, CreateAssigneeView, NotFoundView)
 - `components/` — reusable components (TodoList, TodoItem, TodoForm, AssigneeList, AssigneeForm)
 - `services/apiService.ts` — centralized API client (throws on failed requests; no offline fallback)
-- `assets/base.css` — design tokens for every colour (including the chart palette) and the `prefers-reduced-motion` fallback
+- `assets/base.css` — design tokens for every colour (including the chart palette), the light/dark theme blocks and the `prefers-reduced-motion` fallback; `ts/theme.ts` plus the header toggle switch themes, and `index.html` resolves the stored choice (or the system preference) into `data-theme` before first paint
 - `types/` — TypeScript interfaces mirroring backend DTOs
 - `router/` — Vue Router configuration (`/` redirects to `/todos`, unknown paths render NotFoundView)
 - Component tests live next to the component (`*.test.ts`, Vitest + jsdom)

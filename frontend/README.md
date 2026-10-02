@@ -86,4 +86,5 @@ Das Frontend verwendet ein mehrstufiges `Dockerfile` (`frontend/Dockerfile`). Es
 * **Suche und Filter:** Suche nach Titel und Sortierung nach verschiedenen Attributen (Titel, Priorität, Fälligkeitsdatum) in der ToDo-Übersicht implementiert.
 * **Aufgabentrennung:** Offene und erledigte Aufgaben werden jetzt in separaten Abschnitten angezeigt, um eine bessere Übersicht zu ermöglichen.
 * **Sprache:** Die Benutzeroberfläche ist durchgehend Englisch (Labels, Meldungen, Tabellenköpfe). Kernentitätsnamen wie "Assignees" und "Todos" bleiben ebenfalls Englisch.
+* **Design:** Helles und dunkles Theme mit Umschalter im Header (`App.vue`). Ohne eigene Wahl folgt die App der Systemeinstellung; die Auswahl wird lokal gespeichert und vor dem ersten Paint gesetzt (kein Flackern, `index.html`).
 * **Fehlerzustände:** Fehlgeschlagene Ladevorgänge zeigen eine explizite Meldung mit Retry-Button statt eines leeren oder dauerhaft ladenden Zustands.
