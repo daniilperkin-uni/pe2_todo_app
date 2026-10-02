@@ -185,6 +185,75 @@ public class TodoControllerTest {
     }
 
     @Test
+    @DisplayName("finishing a recurring todo via the board spawns the next occurrence")
+    public void transitionRecurringTodoToDoneSpawnsSuccessor() throws Exception {
+        testTodo.put("recurrenceRule", "WEEKLY");
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"DONE\""))
+               .andExpect(status().isOk());
+
+        JSONArray todos = new JSONArray(mockMvc.perform(get("/api/v1/todos"))
+                                              .andExpect(status().isOk())
+                                              .andReturn().getResponse().getContentAsString());
+        Assertions.assertEquals(2, todos.length(), "finishing via the board must spawn exactly one successor");
+    }
+
+    @Test
+    @DisplayName("repeated DONE transitions spawn only one successor for a recurring todo")
+    public void repeatedDoneSpawnsOnlyOneSuccessor() throws Exception {
+        testTodo.put("recurrenceRule", "WEEKLY");
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+        long id = getId(todoJson);
+
+        // Finished through the list (PUT) first, then moved onto DONE twice:
+        // neither of the repeated DONE moves may spawn another successor.
+        setFinished(todoJson, true);
+        mockMvc.perform(put("/api/v1/todos/{id}", id).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk());
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", id).contentType(MediaType.APPLICATION_JSON_VALUE).content("\"DONE\""))
+               .andExpect(status().isOk());
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", id).contentType(MediaType.APPLICATION_JSON_VALUE).content("\"DONE\""))
+               .andExpect(status().isOk());
+
+        JSONArray todos = new JSONArray(mockMvc.perform(get("/api/v1/todos"))
+                                              .andExpect(status().isOk())
+                                              .andReturn().getResponse().getContentAsString());
+        Assertions.assertEquals(2, todos.length(), "a recurring todo must spawn at most one successor per finishing transition");
+    }
+
+    @Test
+    @DisplayName("ticking a todo finished keeps the kanban status in sync (DONE)")
+    public void tickingFinishedSetsStatusDone() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        setFinished(todoJson, true);
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finished").value(true))
+               .andExpect(jsonPath("$.status").value("DONE"));
+    }
+
+    @Test
+    @DisplayName("un-ticking a DONE todo moves it back to OPEN")
+    public void untickingDoneResetsStatusToOpen() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        mockMvc.perform(patch("/api/v1/todos/{id}/status", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content("\"DONE\""))
+               .andExpect(status().isOk());
+
+        setFinished(todoJson, false);
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finished").value(false))
+               .andExpect(jsonPath("$.status").value("OPEN"));
+    }
+
+    @Test
     @DisplayName("validation: todo with empty title fails (400)")
     public void createInvalidTodoEmptyTitle() throws Exception {
         setTitle(testTodo, "");

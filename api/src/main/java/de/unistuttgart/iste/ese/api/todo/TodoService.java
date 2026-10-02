@@ -135,25 +135,32 @@ public class TodoService {
             }
         }
 
-        // Handle finished-state transitions for updates (existing todo)
+        // Handle finished-state transitions for updates (existing todo). The
+        // kanban status mirrors the finished flag, so a transition also moves
+        // the todo into (DONE) or out of (OPEN) the done column.
         if (existingTodo != null) {
             boolean wasFinished = existingTodo.isFinished();
             boolean isNowFinished = dto.isFinished();
             if (!wasFinished && isNowFinished) {
                 todo.setFinished(true);
                 todo.setFinishedDate(LocalDate.now());
+                todo.setStatus(TodoStatus.DONE);
             } else if (wasFinished && !isNowFinished) {
                 // Allow resetting the finished state
                 todo.setFinished(false);
                 todo.setFinishedDate(null);
+                if (todo.getStatus() == TodoStatus.DONE) {
+                    todo.setStatus(TodoStatus.OPEN);
+                }
             } else {
                 todo.setFinished(isNowFinished);
             }
         } else {
-            // Respect finished state on creation
+            // Respect finished state on creation; DONE stays in sync with it.
             if (dto.isFinished()) {
                 todo.setFinished(true);
                 todo.setFinishedDate(LocalDate.now());
+                todo.setStatus(TodoStatus.DONE);
             } else {
                 todo.setFinished(false);
             }
@@ -275,8 +282,9 @@ public class TodoService {
      * <p>Valid Kanban workflow transitions are defined by the order in
      * {@link TodoStatus}: OPEN → IN_PROGRESS → DONE. A todo may move to any
      * earlier state (re-opening). Moving to DONE sets the finished flag and
-     * finishedDate; moving away from DONE clears them. Moving to OPEN or
-     * IN_PROGRESS clears them.
+     * finishedDate; moving to any other status clears them. Finishing a
+     * recurring todo spawns its next occurrence exactly once, on the
+     * transition into DONE.
      *
      * @param id     the identifier of the todo to update
      * @param status the new workflow status
@@ -296,6 +304,11 @@ public class TodoService {
         Todo todo = todoRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Todo not found with id " + id));
 
+        // Captured before the mutation below: only the actual transition into
+        // the finished state may spawn a recurring todo's successor, so a
+        // repeated move onto DONE must not create a second occurrence.
+        boolean wasFinished = todo.isFinished();
+
         // Synchronize the finished flag with the DONE status
         if (newStatus == TodoStatus.DONE) {
             todo.setFinished(true);
@@ -309,31 +322,13 @@ public class TodoService {
 
         todo.setStatus(newStatus);
         Todo savedTodo = todoRepository.save(todo);
-        // Finishing via the kanban board also spawns the next recurrence.
-        if (newStatus == TodoStatus.DONE) {
+        // Finishing via the kanban board also spawns the next recurrence, but
+        // only once per finishing transition - not again when a todo that is
+        // already finished is moved onto DONE a second time.
+        if (!wasFinished && newStatus == TodoStatus.DONE) {
             spawnNextRecurrence(savedTodo);
         }
         return convertToDTO(savedTodo);
-    }
-
-    /**
-     * Returns todos grouped and counted by status for the kanban board.
-     *
-     * @return a map from status name to the list of todo DTOs in that column
-     */
-    @Transactional(readOnly = true)
-    public java.util.Map<TodoStatus, List<TodoDTO>> getTodosByStatus() {
-        java.util.Map<TodoStatus, List<TodoDTO>> result = new java.util.EnumMap<>(TodoStatus.class);
-        for (TodoStatus s : TodoStatus.values()) {
-            result.put(s, List.of());
-        }
-        java.util.Map<TodoStatus, List<TodoDTO>> grouped = todoRepository.findAll().stream()
-            .collect(Collectors.groupingBy(
-                Todo::getStatus,
-                java.util.stream.Collectors.mapping(this::convertToDTO, Collectors.toList())
-            ));
-        result.putAll(grouped);
-        return result;
     }
 
     /**
@@ -506,7 +501,7 @@ public class TodoService {
         next.setRecurrenceRule(finishedTodo.getRecurrenceRule());
         next.setNextOccurrenceDate(nextDue);
         next.setDueDate(nextDue);
-        next.setAssigneeList(finishedTodo.getAssigneeList());
+        next.setAssigneeList(new HashSet<>(finishedTodo.getAssigneeList()));
         next.setCategory(finishedTodo.getCategory());
         next.setStatus(TodoStatus.OPEN);
         todoRepository.save(next);
