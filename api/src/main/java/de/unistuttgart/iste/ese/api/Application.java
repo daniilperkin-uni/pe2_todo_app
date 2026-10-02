@@ -28,10 +28,12 @@ public class Application {
              */
             @Override
             public void addCorsMappings(@Nonnull CorsRegistry registry) {
-                // allow CORS requests for all resources and HTTP methods from the frontend origin
+                // allow CORS requests for all resources and HTTP methods from the frontend origins;
+                // the Vite dev server runs on 5173, browsers send the bare host for port 80
                 registry.addMapping("/**")
                         .allowedMethods("*")
-                        .allowedOrigins("http://localhost:5173", "http://localhost:80")
+                        .allowedOrigins("http://localhost:5173", "http://127.0.0.1:5173",
+                                "http://localhost", "http://127.0.0.1")
                         .allowCredentials(true);
             }
         };
