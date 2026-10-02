@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Todo } from '@/types/todo'
-import { isOverdue } from '@/ts/dueDateFilters'
+import { isOverdue, parseIsoDate } from '@/ts/dueDateFilters'
 import { Button } from 'agnostic-vue'
 
 const props = defineProps<{
@@ -11,6 +11,13 @@ const props = defineProps<{
 const emit = defineEmits(['toggle-finished', 'edit', 'delete', 'report-priority'])
 
 const overdue = computed(() => isOverdue(props.todo))
+
+// The stored due date is a plain yyyy-MM-dd string; parseIsoDate reads it as
+// a local date so the display does not shift a day in western time zones.
+const dueDateLabel = computed(() => {
+  const dueDate = parseIsoDate(props.todo.dueDate)
+  return dueDate ? dueDate.toLocaleDateString() : null
+})
 
 const priorityClass = computed(() => {
   switch (props.todo.priority) {
@@ -66,9 +73,7 @@ function handleReportPriority() {
         <div class="todo-meta">
           <span v-if="todo.category" class="meta-tag category-tag">{{ todo.category }}</span>
           <span :class="['meta-tag', 'priority-tag', priorityClass]">{{ todo.priority }}</span>
-          <span v-if="todo.dueDate" class="meta-tag due-date-tag">
-            Due: {{ new Date(todo.dueDate).toLocaleDateString() }}
-          </span>
+          <span v-if="dueDateLabel" class="meta-tag due-date-tag"> Due: {{ dueDateLabel }} </span>
           <span v-if="overdue" class="meta-tag overdue-tag">Overdue</span>
         </div>
       </div>
