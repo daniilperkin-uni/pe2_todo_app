@@ -1,6 +1,6 @@
 services:
   database:
-    image: mariadb
+    image: mariadb:11.8
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is not set - copy .env.example to .env and set it}
@@ -18,7 +18,8 @@ services:
       dockerfile: Dockerfile
       target: production-stage
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     # For local testing add a concrete port mapping here, e.g. "8000:80"
     ports:
       - "80:80"
@@ -33,6 +34,12 @@ services:
       database:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     environment:
       - DB_URL=jdbc:mariadb://database:3306/pe2?createDatabaseIfNotExist=true&serverTimezone=UTC&useUnicode=yes&characterEncoding=UTF-8
       - DB_USERNAME=${DB_USERNAME:?DB_USERNAME is not set - copy .env.example to .env and set it}
