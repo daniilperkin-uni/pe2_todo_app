@@ -1,8 +1,7 @@
-FROM node:lts-alpine AS build-stage
+FROM node:22-alpine AS build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
-RUN npm install --save-dev @types/file-saver
 COPY . .
 RUN npm run build
 
