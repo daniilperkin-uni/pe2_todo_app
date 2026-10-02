@@ -46,10 +46,10 @@ watchEffect(() => {
   if (props.initialTodo) {
     todoForm.value = {
       title: props.initialTodo.title,
-      description: props.initialTodo.description,
+      description: props.initialTodo.description ?? '',
       finished: props.initialTodo.finished,
       priority: props.initialTodo.priority,
-      dueDate: props.initialTodo.dueDate,
+      dueDate: props.initialTodo.dueDate ?? '',
       assigneeIdList: props.initialTodo.assigneeList?.map((a) => a.id) || [],
       recurrenceRule: props.initialTodo.recurrenceRule ?? 'NONE'
     }
