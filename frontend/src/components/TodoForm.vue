@@ -134,14 +134,22 @@ onMounted(fetchAssignees)
 
     <div class="form-group">
       <label for="assignees">Assignees:</label>
-      <div v-if="isLoadingAssignees">Loading assignees...</div>
-      <div v-else-if="availableAssignees.length === 0">No assignees available.</div>
-      <select v-else id="assignees" v-model="todoForm.assigneeIdList" multiple>
+      <!-- The select renders in every state (disabled while loading or empty)
+           so the label's for attribute always references a real control;
+           otherwise accessibility tools and autofill lose the association. -->
+      <select
+        id="assignees"
+        v-model="todoForm.assigneeIdList"
+        multiple
+        :disabled="isLoadingAssignees || availableAssignees.length === 0"
+      >
         <option v-for="assignee in availableAssignees" :key="assignee.id" :value="assignee.id">
           {{ assignee.prename }} {{ assignee.name }}
         </option>
       </select>
-      <small class="form-hint">Hold Ctrl/Cmd to select multiple assignees.</small>
+      <div v-if="isLoadingAssignees">Loading assignees...</div>
+      <div v-else-if="availableAssignees.length === 0">No assignees available.</div>
+      <small v-else class="form-hint">Hold Ctrl/Cmd to select multiple assignees.</small>
     </div>
 
     <div class="form-group checkbox-group">

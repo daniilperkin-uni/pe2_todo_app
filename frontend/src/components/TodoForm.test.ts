@@ -56,3 +56,19 @@ describe('TodoForm due date validation', () => {
     expect(wrapper.text()).toContain('Due date must be in the future.')
   })
 })
+
+describe('TodoForm label associations', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  // Regression: with no assignees the select used to be replaced by a plain
+  // message, leaving the label's for attribute without a target.
+  it('renders the assignees select in every state so the label has a target', async () => {
+    const wrapper = await mountEditForm(overdueTodo())
+
+    expect(wrapper.find('label[for="assignees"]').exists()).toBe(true)
+    expect(wrapper.find('#assignees').exists()).toBe(true)
+    expect(wrapper.text()).toContain('No assignees available.')
+  })
+})
