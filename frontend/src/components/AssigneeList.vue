@@ -43,9 +43,11 @@ function handleDetails(id: number) {
           <td>{{ assignee.name }}</td>
           <td>{{ assignee.email }}</td>
           <td>
-            <Button small mode="primary" @click="handleEdit(assignee.id)">Edit</Button>
-            <Button small mode="secondary" @click="handleDetails(assignee.id)">Details</Button>
-            <Button small mode="danger" @click="handleDelete(assignee.id)">Delete</Button>
+            <Button size="small" mode="primary" @click="handleEdit(assignee.id)">Edit</Button>
+            <Button size="small" mode="secondary" @click="handleDetails(assignee.id)"
+              >Details</Button
+            >
+            <Button size="small" mode="danger" @click="handleDelete(assignee.id)">Delete</Button>
           </td>
         </tr>
       </tbody>

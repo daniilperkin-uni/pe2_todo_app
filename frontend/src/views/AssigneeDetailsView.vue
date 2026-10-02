@@ -7,14 +7,21 @@ import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee'
 import { showToast, Toast } from '@/ts/toasts'
 import { Button } from 'agnostic-vue'
 
+const props = defineProps<{
+  // The list links to /assignees/:id (read) and /assignees/:id/edit
+  // (form); both routes pass their params as props.
+  id?: string
+  isEditing?: boolean
+}>()
+
 const route = useRoute()
 const router = useRouter()
 const assignee = ref<Assignee | null>(null)
 const isLoading = ref<boolean>(true)
-const isEditing = ref<boolean>(false)
+const isEditing = ref<boolean>(props.isEditing === true)
 const showDeleteConfirm = ref<boolean>(false)
 
-const assigneeId = ref<number>(Number(route.params.id))
+const assigneeId = ref<number>(Number(props.id ?? route.params.id))
 
 // Ruft die Details des Zuständigen vom Backend ab.
 async function fetchAssignee() {
@@ -85,6 +92,15 @@ watch(
   (newId) => {
     assigneeId.value = Number(newId)
     fetchAssignee()
+  }
+)
+
+// Navigating from the detail route to its /edit sibling keeps the same id;
+// only the isEditing prop changes, so mirror it into the local state.
+watch(
+  () => props.isEditing,
+  (value) => {
+    isEditing.value = value === true
   }
 )
 
