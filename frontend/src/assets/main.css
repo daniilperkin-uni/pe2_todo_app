@@ -64,6 +64,10 @@ select {
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
   margin-top: 5px;
   margin-bottom: 10px;
+  /* Explicit colours so dark-mode browsers cannot render dark-on-dark
+     controls (color-scheme: light in base.css covers the rest). */
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
 textarea {

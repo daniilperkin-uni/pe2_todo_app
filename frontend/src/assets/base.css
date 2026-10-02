@@ -1,5 +1,10 @@
 /* Slick Design System */
 :root {
+  /* The app has exactly one (light) theme: keep the browser's native form
+     controls, date pickers and scrollbars light even when the operating
+     system prefers dark, otherwise they render dark-on-dark. */
+  color-scheme: light;
+
   /* Colors */
   --color-primary: #3498db; /* A vibrant blue */
   --color-primary-light: #5dade2;
