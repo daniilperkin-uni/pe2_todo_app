@@ -182,6 +182,28 @@ class AssigneeControllerTest {
         createAssignee(testAssignee, status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("creating an assignee with an already used email fails (409)")
+    public void createDuplicateEmailAssignee() throws Exception {
+        JSONObject first = createAssigneeSuccessful(testAssigneeReq());
+        JSONObject duplicate = testAssigneeReq();
+        setEmail(duplicate, getEmail(first));
+        createAssignee(duplicate, status().isConflict());
+    }
+
+    @Test
+    @DisplayName("updating an assignee onto another assignee's email fails (409)")
+    public void updateDuplicateEmailAssignee() throws Exception {
+        JSONObject first = createAssigneeSuccessful(testAssigneeReq());
+        JSONObject second = createAssigneeSuccessful(testAssigneeReq());
+
+        setEmail(second, getEmail(first));
+        mockMvc.perform(put("/api/v1/assignees/{id}", getId(second))
+                   .contentType(MediaType.APPLICATION_JSON)
+                   .content(second.toString()))
+               .andExpect(status().isConflict());
+    }
+
     private JSONObject createAssignee(JSONObject testAssignee, ResultMatcher... resultMatchers) throws Exception {
         MockHttpServletResponse response = mockMvc.perform(post("/api/v1/assignees").contentType(MediaType.APPLICATION_JSON_VALUE).content(testAssignee.toString()))
                                                   .andExpectAll(resultMatchers)

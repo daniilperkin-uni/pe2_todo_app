@@ -97,11 +97,11 @@ public class AssigneeService {
      *
      * @param assigneeDTO the data for the new assignee
      * @return the created assignee as DTO
-     * @throws ResponseStatusException with status {@code 400} when the email is already in use
+     * @throws ResponseStatusException with status {@code 409} when the email is already in use
      */
     public AssigneeDTO createAssignee(AssigneeCreateUpdateDTO assigneeDTO) {
         if (assigneeRepository.existsByEmail(assigneeDTO.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
         Assignee newAssignee = convertToEntity(assigneeDTO);
         Assignee savedAssignee = assigneeRepository.save(newAssignee);
@@ -115,14 +115,14 @@ public class AssigneeService {
      * @param assigneeDTO the new data
      * @return the updated assignee as DTO
      * @throws ResponseStatusException with status {@code 404} when the assignee does not exist,
-     *     or {@code 400} when the new email is already used by another assignee
+     *     or {@code 409} when the new email is already used by another assignee
      */
     public AssigneeDTO updateAssignee(Long id, AssigneeCreateUpdateDTO assigneeDTO) {
         Assignee assignee = assigneeRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Assignee not found with id " + id));
         // Reject the update when the new email belongs to a different assignee
         if (!assignee.getEmail().equals(assigneeDTO.getEmail()) && assigneeRepository.existsByEmail(assigneeDTO.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already exists");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
         }
         assignee.setPrename(assigneeDTO.getPrename());
         assignee.setName(assigneeDTO.getName());
