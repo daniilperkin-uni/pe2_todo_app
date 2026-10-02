@@ -1,0 +1,10 @@
+# The API image is built from the repository root (docker-compose context: .),
+# so this file must sit here. Build artifacts and local state are not needed.
+.git
+.github
+.idea
+img
+api/target
+frontend/node_modules
+frontend/dist
+mariadb-data
