@@ -12,3 +12,7 @@ insert_final_newline = true
 
 [*.{yml,yaml}]
 indent_size = 2
+
+# The frontend (Vue/TS) is formatted by Prettier with 2-space indentation.
+[*.{ts,js,vue,json,css,html}]
+indent_size = 2

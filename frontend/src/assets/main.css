@@ -1,27 +1,5 @@
 @import './base.css';
 
-/* General Body Styling */
-body {
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
-    'Helvetica Neue',
-    sans-serif;
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background-color: var(--color-background); /* Light grey background */
-  color: var(--color-text);
-}
-
 /* Container for main content */
 #app {
   max-width: 1200px;
@@ -141,9 +119,6 @@ textarea {
     flex-direction: column;
     align-items: stretch;
   }
-  .search-bar input {
-    width: 100%;
-  }
 }
 
 @media (max-width: 480px) {
@@ -153,29 +128,4 @@ textarea {
   .form-actions button {
     width: 100%;
   }
-}
-
-/* Agnostic-Vue Header Overrides */
-.header {
-  background-color: var(--color-surface) !important;
-  color: var(--color-text) !important;
-  padding: 0 1rem;
-  box-shadow: var(--box-shadow-sm);
-}
-
-.header-nav a {
-  color: var(--color-text) !important;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: var(--border-radius-sm);
-}
-
-.header-nav a:hover,
-.header-nav a.router-link-exact-active {
-  color: var(--color-primary) !important;
-  background-color: var(--color-secondary) !important;
-}
-
-.header-nav a.router-link-exact-active {
-  font-weight: 700;
 }
