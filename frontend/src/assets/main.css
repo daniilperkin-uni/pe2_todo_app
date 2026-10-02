@@ -64,8 +64,8 @@ select {
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
   margin-top: 5px;
   margin-bottom: 10px;
-  /* Explicit colours so dark-mode browsers cannot render dark-on-dark
-     controls (color-scheme: light in base.css covers the rest). */
+  /* Explicit colours so the controls never render dark-on-dark; base.css
+     pins color-scheme per theme, this keeps the colours in step with it. */
   background-color: var(--color-surface);
   color: var(--color-text);
 }

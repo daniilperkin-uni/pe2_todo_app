@@ -1,8 +1,9 @@
 /* Slick Design System */
 :root {
-  /* The app has exactly one (light) theme: keep the browser's native form
-     controls, date pickers and scrollbars light even when the operating
-     system prefers dark, otherwise they render dark-on-dark. */
+  /* Light is the default and the no-JavaScript fallback; the explicit
+     [data-theme] blocks at the end of the file mirror it and add the dark
+     palette, and they keep the browser's native form controls, date pickers
+     and scrollbars in sync with the chosen theme. */
   color-scheme: light;
 
   /* Colors */
@@ -98,4 +99,74 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Explicit theme selection. index.html resolves the stored choice (or the
+   system preference) into data-theme before first paint, so exactly one of
+   these blocks always matches; both also pin color-scheme, which keeps the
+   native controls on the chosen theme. */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-primary: #4da3e0;
+  --color-primary-light: #7cc0ec;
+  --color-primary-dark: #2f83bd;
+
+  --color-secondary: #2b323b;
+  --color-background: #191d22;
+  --color-surface: #232931;
+  --color-surface-alt: #2a3139;
+
+  --color-text: #e7eaee;
+  --color-text-light: #9ba6b2;
+
+  --color-border: #3a434e;
+  --color-border-hover: #4e5a66;
+
+  --color-success: #43c882;
+  --color-error: #ef756d;
+  --color-warning: #eaa844;
+
+  /* Priority tags: dark tints with light text instead of light pastels. */
+  --color-priority-low-bg: #1e3126;
+  --color-priority-low: #8ad39c;
+  --color-priority-medium-bg: #3a2f1d;
+  --color-priority-medium: #efbc67;
+  --color-priority-high-bg: #3d2527;
+  --color-priority-high: #ef9090;
+
+  /* Lightened Okabe-Ito variants so the charts stay readable on dark. */
+  --color-chart-series-1: #4da3e0;
+  --color-chart-series-2: #f0b054;
+  --color-chart-series-3: #3dbf94;
+  --color-chart-series-4: #dd93c0;
+  --color-chart-series-5: #7cc9f0;
+  --color-chart-series-6: #f08a4c;
+}
+
+/* AgnosticUI switches its own palette on the OS preference alone; re-pointing
+   the hooks it exposes on [data-theme] (which wins by specificity) keeps its
+   buttons on the app theme even when the user overrides the system choice. */
+:root[data-theme] {
+  --agnostic-btn-primary: var(--color-primary);
+  --agnostic-btn-primary-color: #ffffff;
+  --agnostic-btn-secondary: var(--color-secondary);
+  --agnostic-btn-secondary-color: var(--color-text);
+}
+
+/* alert-info (the toasts) consumes background: primary-light and
+   colour: primary-dark, so the dark theme flips them to a dark tint with
+   light text instead of light-blue on dark-blue. */
+:root[data-theme='light'] {
+  --agnostic-primary-light: var(--color-primary-light);
+  --agnostic-primary-dark: var(--color-primary-dark);
+}
+
+:root[data-theme='dark'] {
+  --agnostic-primary-light: #253544;
+  --agnostic-primary-dark: #bcd8ee;
 }

@@ -406,7 +406,7 @@ onMounted(fetchTodos)
 
 .sort-select {
   min-width: 150px;
-  background-color: white;
+  background-color: var(--color-surface);
 }
 
 .loading-message {

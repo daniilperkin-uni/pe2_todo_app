@@ -2,6 +2,7 @@
 import { RouterView, RouterLink } from 'vue-router'
 import { Close, Toast, Toasts } from 'agnostic-vue'
 import { activeToasts } from '@/ts/toasts'
+import { activeTheme, toggleTheme } from '@/ts/theme'
 
 import 'agnostic-vue/dist/common.min.css'
 import 'agnostic-vue/dist/index.css'
@@ -18,6 +19,19 @@ import 'agnostic-vue/dist/index.css'
           <RouterLink to="/todos">Todos</RouterLink>
           <RouterLink to="/assignees">Assignees</RouterLink>
           <RouterLink to="/stats">Stats</RouterLink>
+          <button
+            type="button"
+            class="theme-toggle"
+            :title="
+              activeTheme === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'
+            "
+            :aria-label="
+              activeTheme === 'dark' ? 'Switch to the light theme' : 'Switch to the dark theme'
+            "
+            @click="toggleTheme"
+          >
+            {{ activeTheme === 'dark' ? '☀️' : '🌙' }}
+          </button>
         </nav>
       </div>
     </header>
@@ -51,18 +65,6 @@ import 'agnostic-vue/dist/index.css'
 
 <style>
 /* Global styles to override AgnosticUI defaults and apply the new design */
-:root {
-  --agn-button-primary-background: var(--color-primary);
-  --agn-button-primary-border-color: var(--color-primary-dark);
-  --agn-button-primary-color: var(--vt-c-white);
-  --agn-button-primary-hover-background: var(--color-primary-dark);
-
-  --agn-input-border-radius: var(--border-radius-sm);
-  --agn-input-border-color: var(--color-border);
-  --agn-input-hover-border-color: var(--color-border-hover);
-  --agn-input-focus-border-color: var(--color-primary);
-}
-
 .card {
   background-color: var(--color-surface);
   border-radius: var(--border-radius-md);
@@ -139,6 +141,21 @@ import 'agnostic-vue/dist/index.css'
 .main-nav a.router-link-exact-active {
   color: var(--color-primary);
   border-bottom-color: var(--color-primary);
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-secondary);
 }
 
 .main-content {
