@@ -158,15 +158,30 @@ body {
   --agnostic-btn-secondary-color: var(--color-text);
 }
 
-/* alert-info (the toasts) consumes background: primary-light and
-   colour: primary-dark, so the dark theme flips them to a dark tint with
-   light text instead of light-blue on dark-blue. */
+/* Alerts and toasts. AgnosticUI switches this palette on the OS preference
+   alone, and its dark values are still light pastels (success: #baf9ca) - a
+   light-green toast under our near-white title is unreadable, as reported.
+   Each app theme pins the whole set instead: light keeps the library's
+   pastels, dark uses the app's tinted tag colours with light text. The
+   success alert consumes the action-* pair, error/warning/info their own. */
 :root[data-theme='light'] {
-  --agnostic-primary-light: var(--color-primary-light);
-  --agnostic-primary-dark: var(--color-primary-dark);
+  --agnostic-primary-light: var(--agnostic-primary-light-modelight);
+  --agnostic-primary-dark: var(--agnostic-primary-dark-modelight);
+  --agnostic-action-light: var(--agnostic-action-light-modelight);
+  --agnostic-action-dark: var(--agnostic-action-dark-modelight);
+  --agnostic-error-light: var(--agnostic-error-light-modelight);
+  --agnostic-error-dark: var(--agnostic-error-dark-modelight);
+  --agnostic-warning-light: var(--agnostic-warning-light-modelight);
+  --agnostic-warning-dark: var(--agnostic-warning-dark-modelight);
 }
 
 :root[data-theme='dark'] {
   --agnostic-primary-light: #253544;
   --agnostic-primary-dark: #bcd8ee;
+  --agnostic-action-light: #1e3126;
+  --agnostic-action-dark: #8ad39c;
+  --agnostic-error-light: #3d2527;
+  --agnostic-error-dark: #ef9090;
+  --agnostic-warning-light: #3a2f1d;
+  --agnostic-warning-dark: #efbc67;
 }
