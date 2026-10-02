@@ -1,27 +1,17 @@
 import { type Ref, ref } from 'vue'
-import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
-import { faInfo } from '@fortawesome/free-solid-svg-icons'
 
 type ToastType = 'info' | 'success' | 'error' | 'warning' | 'dark'
 
 export class Toast {
   title: string
   message: string
-  icon: IconDefinition
   type: ToastType
   expired = false
   key = Math.random()
 
-  constructor(
-    title: string,
-    message: string,
-    type: ToastType | null = null,
-    icon: IconDefinition | null = null,
-    timeout: number = 5
-  ) {
+  constructor(title: string, message: string, type: ToastType | null = null, timeout: number = 5) {
     this.title = title
     this.message = message
-    this.icon = icon || faInfo
     this.type = type || 'info'
 
     setTimeout(() => this.close(), timeout * 1_000)
