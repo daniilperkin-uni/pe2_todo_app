@@ -354,4 +354,27 @@ onMounted(fetchTodos)
   border: 1px dashed var(--color-border);
   border-radius: var(--border-radius-sm);
 }
+
+/* Narrow screens: three columns side by side squeeze to a few characters per
+   line, so stack them (Open, In Progress, Done) with full-width cards. */
+@media (max-width: 768px) {
+  .view-header {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .board {
+    grid-template-columns: 1fr;
+  }
+
+  .board-column {
+    min-height: 160px;
+  }
+}
 </style>
