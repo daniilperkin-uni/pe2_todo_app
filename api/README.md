@@ -6,6 +6,10 @@ Um MariaDB zu starten: in CMD: `docker run -d --name pe2-mariadb -p 3306:3306 -e
 
 Um Anwendung zu starten: in CMD: `cd api && ./mvnw spring-boot:run`
 
+Unter Windows mit Git Bash kann der Download des Maven-Wrappers fehlschlagen
+(MSYS-Pfade plus natives `curl`); dann die Befehle in CMD/PowerShell ausführen
+oder ein lokal installiertes Maven verwenden.
+
 Dafür müssen die Datenbank-Zugangsdaten als Umgebungsvariablen gesetzt sein
 (`DB_USERNAME`, `DB_PASSWORD`, optional `DB_URL` - siehe `.env.example`); es gibt
 keine hartcodierten Standardwerte mehr.

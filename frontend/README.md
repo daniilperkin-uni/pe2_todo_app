@@ -1,6 +1,6 @@
 # Frontend
 
-Dies ist ein Beispielprojekt für ein Single-Page-Application-Frontend mit Vue.js v3. Die Benutzeroberfläche ist während der Entwicklung unter <http://localhost:5173> erreichbar und normalerweise unter `http://localhost`, wenn sie über Docker Compose ausgeführt wird.
+Dies ist das Vue.js-v3-Frontend der ToDo-Webanwendung. Die Benutzeroberfläche ist während der Entwicklung unter <http://localhost:5173> erreichbar und normalerweise unter `http://localhost`, wenn sie über Docker Compose ausgeführt wird.
 
 Voraussetzung ist Node.js 22 oder neuer (`engines` in `frontend/package.json`).
 
@@ -74,6 +74,7 @@ So erstellen Sie die produktionsbereiten statischen Assets:
 * **Tests:** `npm test` (Vitest).
 * **Linting:** `npm run lint:ci`, um nach ESLint-Problemen zu suchen (ohne Auto-Fix; exakt das CI-Gate).
 * **Formatierung:** `npm run format`, um den Code automatisch mit Prettier zu formatieren.
+* **Formatprüfung:** `npm run format:check` prüft die Formatierung ohne zu schreiben (exakt das CI-Gate).
 * **Build:** `npm run build` (Typprüfung + `vite build`).
 
 ## Docker-Integration
@@ -85,3 +86,4 @@ Das Frontend verwendet ein mehrstufiges `Dockerfile` (`frontend/Dockerfile`). Es
 * **Suche und Filter:** Suche nach Titel und Sortierung nach verschiedenen Attributen (Titel, Priorität, Fälligkeitsdatum) in der ToDo-Übersicht implementiert.
 * **Aufgabentrennung:** Offene und erledigte Aufgaben werden jetzt in separaten Abschnitten angezeigt, um eine bessere Übersicht zu ermöglichen.
 * **Sprache:** Die Benutzeroberfläche ist durchgehend Englisch (Labels, Meldungen, Tabellenköpfe). Kernentitätsnamen wie "Assignees" und "Todos" bleiben ebenfalls Englisch.
+* **Fehlerzustände:** Fehlgeschlagene Ladevorgänge zeigen eine explizite Meldung mit Retry-Button statt eines leeren oder dauerhaft ladenden Zustands.

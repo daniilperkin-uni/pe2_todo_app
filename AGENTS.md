@@ -38,12 +38,13 @@ Vite dev server runs on <http://localhost:5173>.
 
 ```bash
 # Backend
-cd api && ./mvnw clean test   # ./mvnw verify adds Checkstyle + JaCoCo >= 80 % (as in CI)
+cd api && ./mvnw clean test   # Checkstyle (validate) + tests; ./mvnw verify adds the JaCoCo >= 80 % gate (as in CI)
 
 # Frontend
 cd frontend && npm run test          # Vitest
 cd frontend && npm run type-check    # vue-tsc
 cd frontend && npm run lint:ci       # ESLint, exactly the CI gate
+cd frontend && npm run format:check  # Prettier, exactly the CI gate
 cd frontend && npm run build         # type-check + vite build
 ```
 
@@ -85,7 +86,9 @@ cd frontend && npm run build         # type-check + vite build
 5. **CORS must use explicit origins**, not `allowedOriginPatterns("*")`.
 6. **Frontend: never use `v-html`.** Always use `{{ }}` interpolation.
 7. **Due-date validation:** a new due date must be in the future on create AND update; an unchanged (already past) due date is accepted on update so overdue todos stay finishable.
-8. **Every public method has Javadoc** (backend) or JSDoc (frontend).
+8. **Javadoc/JSDoc:** public `@Service`/`@Controller` methods (backend) and exported service/utility functions (frontend) are documented.
+9. **Kanban status mirrors the finished flag:** `status == DONE` ⇔ `finished == true`; finishing through PUT or PATCH moves the todo to `DONE`, un-finishing moves it back to `OPEN`.
+10. **Assignee emails need a uni-stuttgart.de domain** (`stud.`, `iste.`, `ipvs.`, `sec.`); enforced in `AssigneeCreateUpdateDTO` and mirrored by the form.
 
 ## Known Issues Fixed
 
@@ -98,6 +101,15 @@ cd frontend && npm run build         # type-check + vite build
 - `updateTodo` read the finished state after `convertToEntity` had already mutated the same instance, so finishing a recurring todo through PUT spawned no successor. The state is now captured before the conversion.
 - `validateDueDate` rejected the unchanged due date on update, which made every overdue todo impossible to complete or edit. The rule now only applies when the due date actually changes.
 - `frontend/src/config.ts` was dead config; the Dockerfile/compose build arg `VITE_API_BASE_URL` was never read. Both removed.
+- `transitionTodoStatus` spawned a successor for a recurring todo on every PATCH onto `DONE`, so finishing through the list and then the board (or repeating `DONE`) created duplicates. The spawn now happens only on the transition into `DONE`; regression tests cover the board-only and the repeated-`DONE` paths.
+- The `finished` flag and the kanban status drifted apart: ticking a todo finished in the list left it in the board's `OPEN` column, and un-ticking a `DONE` todo left it in `DONE`. Both write paths now keep them in sync.
+- `AssigneeDetailsView` declared no props although the router passed `isEditing` and `id`, so the list's Edit button opened the read view. The props are declared and mirrored into the local state now.
+- `TodoItem` rendered `new Date('yyyy-MM-dd')`, which parses as UTC midnight and shows the previous day west of UTC while the overdue badge used the local date. It reuses `parseIsoDate` now.
+- Duplicate assignee emails answered `400` from the service pre-check but `409` from the unique-constraint race; both answer `409` now.
+- `TodoRepository.findAll` lazy-loaded the assignees one query per todo (N+1 for list, stats and CSV); an `@EntityGraph` fetches them with the list query.
+- `docker compose up --build` shipped the whole repository (including `.git` and `node_modules`) as build context, because the `.dockerignore` sat in `api/` while the compose context is the repository root. A root `.dockerignore` fixes this.
+- The frontend never rendered a FontAwesome icon, but `main.ts` registered the complete solid-icon set; dependency and registration removed (entry bundle 1,105 kB → 114 kB).
+- Five views turned fetch errors into misleading empty states or endless "Loading..." screens; each now shows an explicit error message with a retry.
 
 ## Environment Variables
 

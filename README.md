@@ -15,6 +15,7 @@ Mit Docker Compose läuft alles inklusive MariaDB mit einem Befehl.
 - Statistiken: Abschlussquote, durchschnittliche Dauer, Verteilung nach Priorität, Kategorie und Assignee
 - Klassifikator: ein PMML-Modell ordnet jedes ToDo `work` oder `private` zu
 - Prioritäts-Feedback: Korrekturen werden gespeichert und ausgewertet
+- Assignee-E-Mails müssen auf eine Uni-Stuttgart-Domain enden (`stud.`, `iste.`, `ipvs.`, `sec.`), geprüft in Backend und Formular
 - Health- und Prometheus-Endpunkte über Spring Boot Actuator
 
 ## Technologien
@@ -42,8 +43,8 @@ Voraussetzungen: JDK 21, Node.js 22 und Docker (für MariaDB).
 
 ```bash
 docker run -d --name pe2-mariadb -p 3306:3306 \
-  -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=pe2 mariadb:latest
-export DB_USERNAME=root DB_PASSWORD=root   # required, no defaults in the app
+  -e MARIADB_ROOT_PASSWORD=changeme -e MARIADB_DATABASE=pe2 mariadb:11.8
+export DB_USERNAME=root DB_PASSWORD=changeme   # required, no defaults in the app
 cd api && ./mvnw spring-boot:run        # http://localhost:8080
 cd frontend && npm install && npm run dev  # http://localhost:5173
 ```
@@ -71,7 +72,7 @@ Alle Pfade liegen unter `/api/v1`.
 
 ```bash
 cd api && ./mvnw verify   # Tests, Checkstyle (PE2CheckStyle.xml), JaCoCo >= 80 %
-cd frontend && npm ci && npm run lint:ci && npm run type-check && npm test && npm run build
+cd frontend && npm ci && npm run lint:ci && npm run format:check && npm run type-check && npm test && npm run build
 ```
 
 Die gleichen Prüfungen laufen in GitHub Actions (`.github/workflows`).
@@ -88,4 +89,5 @@ Die gleichen Prüfungen laufen in GitHub Actions (`.github/workflows`).
 
 ## Lizenz
 
-Siehe [LICENSE](LICENSE).
+Das Projekt basiert auf der Vorlage des PE2-Kurses. Es gilt die mitgelieferte
+[MIT-Lizenz](LICENSE), © 2021 Justus Bogner (aus der Kursvorlage übernommen).
