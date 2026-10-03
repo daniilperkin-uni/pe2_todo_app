@@ -7,6 +7,11 @@ Full-Stack-Webanwendung zur Verwaltung von ToDos und Assignees.
 Ein Spring Boot Backend stellt eine REST API bereit, ein Vue 3 Frontend (SPA) nutzt sie.
 Mit Docker Compose läuft alles inklusive MariaDB mit einem Befehl.
 
+## Live-Ansicht
+
+Auf der Uni-Showcase-Website gibt es eine interaktive Projektseite mit Screenshots und dem Klassifikator als Live-Widget:
+<https://daniilperkin-uni.github.io/uni-old-projects/#pe2_todo_app>
+
 ## Features
 
 - ToDos und Assignees verwalten (CRUD), filtern, sortieren und als CSV exportieren
