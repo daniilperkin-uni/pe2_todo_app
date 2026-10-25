@@ -92,12 +92,12 @@
         <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-evaluator-metro</artifactId>
-            <version>1.5.15</version>
+            <version>1.7.8</version>
         </dependency>
         <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-model</artifactId>
-            <version>1.5.15</version>
+            <version>1.7.8</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
@@ -124,7 +124,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.13</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <goals>
@@ -197,7 +197,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <configLocation>PE2CheckStyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
