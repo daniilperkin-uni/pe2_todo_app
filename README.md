@@ -12,6 +12,18 @@ Mit Docker Compose läuft alles inklusive MariaDB mit einem Befehl.
 Auf der Uni-Showcase-Website gibt es eine interaktive Projektseite mit Screenshots und dem Klassifikator als Live-Widget:
 <https://daniilperkin-uni.github.io/uni-old-projects/#pe2_todo_app>
 
+## Screenshots
+
+Aufgenommen aus der laufenden Anwendung (Demo-Daten: fiktive Assignees und ToDos).
+
+| ToDo-Liste (hell) | Kanban-Board (dunkel) |
+| --- | --- |
+| ![ToDo-Liste mit Filtern, Prioritäten und Fälligkeiten](docs/screenshots/todos-light.webp) | ![Kanban-Board mit OPEN, IN_PROGRESS und DONE](docs/screenshots/board-dark.webp) |
+
+| Statistiken | Assignees |
+| --- | --- |
+| ![Statistik-Dashboard mit Abschlussquote und Verteilungen](docs/screenshots/stats-light.webp) | ![Assignee-Verwaltung mit E-Mail-Domain-Prüfung](docs/screenshots/assignees-light.webp) |
+
 ## Features
 
 - ToDos und Assignees verwalten (CRUD), filtern, sortieren und als CSV exportieren
@@ -82,16 +94,6 @@ cd frontend && npm ci && npm run lint:ci && npm run format:check && npm run type
 ```
 
 Die gleichen Prüfungen laufen in GitHub Actions (`.github/workflows`).
-
-## Screenshots der Einrichtung
-
-| JDK (Corretto 25) | Git Bash | MariaDB |
-| --- | --- | --- |
-| ![Corretto 25](img/corretto-25.png) | ![Git Bash](img/git-bash.png) | ![MariaDB](img/mariadb.png) |
-
-| `api`-Verzeichnis | Spring Boot Start |
-| --- | --- |
-| ![api-Verzeichnis](img/api-dir.png) | ![Spring Boot Start](img/spring-boot-run.png) |
 
 ## Lizenz
 
