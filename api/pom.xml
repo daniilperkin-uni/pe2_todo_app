@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
     </parent>
 
     <groupId>io.github.daniilperkin</groupId>
@@ -92,12 +92,12 @@
         <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-evaluator-metro</artifactId>
-            <version>1.5.15</version>
+            <version>1.7.8</version>
         </dependency>
         <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-model</artifactId>
-            <version>1.5.15</version>
+            <version>1.7.8</version>
         </dependency>
         <!-- Required at compile time even though no source file names them:
              jpmml-evaluator-metro 1.5.15 is javax-based and its
