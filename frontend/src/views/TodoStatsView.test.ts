@@ -42,9 +42,8 @@ describe('TodoStatsView', () => {
     vi.clearAllMocks()
     getPriorityCorrectionStats.mockResolvedValue({
       totalCorrections: 0,
-      correctedToLow: 0,
-      correctedToMedium: 0,
-      correctedToHigh: 0
+      transitions: {},
+      correctionsPerPriority: {}
     })
   })
 
