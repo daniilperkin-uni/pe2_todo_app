@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import static de.unistuttgart.iste.ese.api.controller.TestUtil.getId;
 import static de.unistuttgart.iste.ese.api.controller.TestUtil.setAssigneeIdList;
 import static de.unistuttgart.iste.ese.api.controller.TestUtil.setFinished;
 import static de.unistuttgart.iste.ese.api.controller.TestUtil.setTitle;
@@ -41,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,8 +91,8 @@ public class AdditionalEx4Test {
         setTitle(testTodo, "set deadline");
         JSONObject todoJson = createTodoSuccessful(testTodo);
 
-        setTitle(testTodo, "Weltherrschaft");
-        assertEquals("private", createTodoSuccessful(testTodo).getString("category"), "Category should be 'private' because of the title");
+        setTitle(todoJson, "Weltherrschaft");
+        assertEquals("private", editTodoSuccessful(todoJson).getString("category"), "Category should be 'private' because of the title");
     }
 
     @Test
@@ -219,6 +221,15 @@ public class AdditionalEx4Test {
             jsonPath("$.assigneeList.length()").value(testTodo.getJSONArray("assigneeIdList").length()),
             jsonPath("$.priority").value(testTodo.getString("priority")),
             jsonPath("$.category").value(Matchers.either(Matchers.is("work")).or(Matchers.is("private"))));
+    }
+
+    private JSONObject editTodoSuccessful(JSONObject todoJson) throws Exception {
+        MvcResult result = mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(todoJson.toString()))
+            .andExpect(status().isOk())
+            .andReturn();
+        return new JSONObject(result.getResponse().getContentAsString());
     }
 
     private boolean compareDatesWithTolerance(LocalDate date1, LocalDate date2) {
