@@ -166,6 +166,19 @@ public class TodoService {
             }
         }
 
+        // Rule 9: status == DONE <=> finished == true. A request may name a
+        // status and a finished flag that contradict each other (status DONE
+        // with finished false, or finished true with status OPEN); left alone
+        // that stores a todo sitting in the board's DONE column while the list
+        // shows it unchecked. The finished flag wins because it is what the
+        // list checkbox and the recurrence trigger are driven by, which is also
+        // how the transition branches above already behave.
+        if (todo.isFinished()) {
+            todo.setStatus(TodoStatus.DONE);
+        } else if (todo.getStatus() == TodoStatus.DONE) {
+            todo.setStatus(TodoStatus.OPEN);
+        }
+
         // Resolve and assign assignees
         Set<Assignee> assignees = new HashSet<>();
         if (dto.getAssigneeIdList() != null) {

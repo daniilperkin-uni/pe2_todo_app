@@ -254,6 +254,51 @@ public class TodoControllerTest {
     }
 
     @Test
+    @DisplayName("a PUT naming status DONE while finished stays false keeps both in sync")
+    public void putStatusDoneWithFinishedFalseKeepsInvariant() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        // Contradictory payload: the board column says DONE while the list
+        // checkbox says not finished. Rule 9 has to hold after the update.
+        todoJson.put("status", "DONE");
+        setFinished(todoJson, false);
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finished").value(false))
+               .andExpect(jsonPath("$.status").value("OPEN"));
+    }
+
+    @Test
+    @DisplayName("a PUT naming status OPEN while finished stays true keeps both in sync")
+    public void putStatusOpenWithFinishedTrueKeepsInvariant() throws Exception {
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+
+        // Finish it first, so the contradictory update below takes the
+        // already-finished branch instead of the fresh-finish transition.
+        setFinished(todoJson, true);
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk());
+
+        todoJson.put("status", "OPEN");
+        setFinished(todoJson, true);
+        mockMvc.perform(put("/api/v1/todos/{id}", getId(todoJson)).contentType(MediaType.APPLICATION_JSON_VALUE).content(todoJson.toString()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.finished").value(true))
+               .andExpect(jsonPath("$.status").value("DONE"));
+    }
+
+    @Test
+    @DisplayName("creating a todo with status DONE and finished false keeps both in sync")
+    public void createStatusDoneWithFinishedFalseKeepsInvariant() throws Exception {
+        testTodo.put("status", "DONE");
+        setFinished(testTodo, false);
+
+        JSONObject todoJson = createTodoSuccessful(testTodo);
+        Assertions.assertFalse(todoJson.getBoolean("finished"), "the finished flag must win over the status");
+        Assertions.assertEquals("OPEN", todoJson.getString("status"));
+    }
+
+    @Test
     @DisplayName("validation: todo with empty title fails (400)")
     public void createInvalidTodoEmptyTitle() throws Exception {
         setTitle(testTodo, "");
