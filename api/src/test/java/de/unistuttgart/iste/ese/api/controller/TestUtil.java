@@ -147,28 +147,8 @@ public class TestUtil {
         return obj.getJSONArray("assigneeList");
     }
 
-    public static String getCategory(JSONObject obj) throws Exception {
-        return obj.getString("category");
-    }
-
-    public static void setCategory(JSONObject obj, String category) throws Exception {
-        obj.put("category", category);
-    }
-
     public static String getCreatedDate(JSONObject obj) throws Exception {
         return obj.getString("createdDate");
-    }
-
-    public static void setCreationDate(JSONObject obj, String creationDate) throws Exception {
-        obj.put("createdDate", creationDate);
-    }
-
-    public static String getFinishedDate(JSONObject obj) throws Exception {
-        return obj.getString("finishedDate");
-    }
-
-    public static void setFinishedDate(JSONObject obj, String finishedDate) throws Exception {
-        obj.put("finishedDate", finishedDate);
     }
 
     public static JSONObject testAssigneeReq() {

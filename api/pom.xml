@@ -99,6 +99,13 @@
             <artifactId>pmml-model</artifactId>
             <version>1.5.15</version>
         </dependency>
+        <!-- Required at compile time even though no source file names them:
+             jpmml-evaluator-metro 1.5.15 is javax-based and its
+             LoadingModelEvaluatorBuilder#load(InputStream) declares
+             javax.xml.bind.JAXBException, so javac cannot analyse the
+             try/catch in TodoClassifier without the API on the classpath.
+             mvn dependency:analyze reports them as "unused declared" because
+             the project's own classes never reference them directly. -->
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
