@@ -55,6 +55,13 @@ hartcodierten Zugangsdaten mehr gibt.
 Die App läuft dann unter <http://localhost>, die API unter `http://localhost/api/v1/...`.
 Daten bleiben über `docker compose down` / `up` hinweg erhalten.
 
+`DB_USERNAME` muss in dieser Betriebsart `root` bleiben: der MariaDB-Container
+legt nur das Root-Konto an (`MARIADB_ROOT_PASSWORD`), weitere Datenbankbenutzer
+existieren dort nicht. Gegen eine eigene Datenbank außerhalb von Compose ist
+jeder vorhandene Benutzer möglich.
+Health- und Prometheus-Endpunkte sind über <http://localhost/actuator/health>
+und `http://localhost/actuator/prometheus` erreichbar.
+
 ## Lokale Entwicklung
 
 Voraussetzungen: JDK 21, Node.js 22 und Docker (für MariaDB).
