@@ -59,8 +59,10 @@ Daten bleiben über `docker compose down` / `up` hinweg erhalten.
 legt nur das Root-Konto an (`MARIADB_ROOT_PASSWORD`), weitere Datenbankbenutzer
 existieren dort nicht. Gegen eine eigene Datenbank außerhalb von Compose ist
 jeder vorhandene Benutzer möglich.
-Health- und Prometheus-Endpunkte sind über <http://localhost/actuator/health>
-und `http://localhost/actuator/prometheus` erreichbar.
+Der Health-Endpunkt ist über <http://localhost/actuator/health> erreichbar.
+Die Prometheus-Metriken bleiben bewusst im Compose-Netz
+(`http://api:8080/actuator/prometheus`), damit ein öffentliches Deployment keine
+Interna preisgibt.
 
 ## Lokale Entwicklung
 
