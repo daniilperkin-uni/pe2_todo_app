@@ -7,11 +7,26 @@ const getAssignee = vi.fn()
 const updateAssignee = vi.fn()
 const deleteAssignee = vi.fn()
 
-vi.mock('@/services/apiService', () => ({
-  getAssignee: (...args: unknown[]) => getAssignee(...args),
-  updateAssignee: (...args: unknown[]) => updateAssignee(...args),
-  deleteAssignee: (...args: unknown[]) => deleteAssignee(...args)
-}))
+vi.mock('@/services/apiService', () => {
+  // The view distinguishes a 404 from other failures with `instanceof
+  // ApiError`, so the mock has to provide the same class shape.
+  class ApiError extends Error {
+    readonly status: number
+
+    constructor(message: string, status: number) {
+      super(message)
+      this.name = 'ApiError'
+      this.status = status
+    }
+  }
+
+  return {
+    ApiError,
+    getAssignee: (...args: unknown[]) => getAssignee(...args),
+    updateAssignee: (...args: unknown[]) => updateAssignee(...args),
+    deleteAssignee: (...args: unknown[]) => deleteAssignee(...args)
+  }
+})
 
 vi.mock('@/ts/toasts', () => ({
   showToast: vi.fn(),
@@ -91,5 +106,47 @@ describe('AssigneeDetailsView', () => {
 
     expect(deleteAssignee).toHaveBeenCalledWith(42)
     expect(push).toHaveBeenCalledWith('/assignees')
+  })
+
+  // The ApiError class lives in the mocked module, so build failures through
+  // the same import the view uses.
+  async function apiError(status: number): Promise<Error> {
+    const { ApiError } = await import('@/services/apiService')
+    return new ApiError(`request failed with status ${status}`, status)
+  }
+
+  it('shows a retryable error state instead of "not found" when the load fails', async () => {
+    getAssignee.mockRejectedValue(await apiError(500))
+
+    const wrapper = await mountView()
+
+    expect(wrapper.text()).toContain('Failed to load assignee details')
+    expect(wrapper.text()).not.toContain('Assignee not found')
+    expect(wrapper.findAll('button').some((button) => button.text() === 'Retry')).toBe(true)
+  })
+
+  it('still reports a genuinely missing assignee for a 404', async () => {
+    getAssignee.mockRejectedValue(await apiError(404))
+
+    const wrapper = await mountView()
+
+    expect(wrapper.text()).toContain('Assignee not found')
+    expect(wrapper.text()).not.toContain('Failed to load assignee details')
+  })
+
+  it('retries the load from the error state', async () => {
+    getAssignee.mockRejectedValueOnce(await apiError(503))
+    getAssignee.mockResolvedValueOnce(assignee())
+
+    const wrapper = await mountView()
+    const retry = wrapper.findAll('button').find((button) => button.text() === 'Retry')
+    expect(retry).toBeDefined()
+
+    await retry!.trigger('click')
+    await flushPromises()
+
+    expect(getAssignee).toHaveBeenCalledTimes(2)
+    expect(wrapper.text()).toContain('Anna')
+    expect(wrapper.text()).not.toContain('Failed to load assignee details')
   })
 })

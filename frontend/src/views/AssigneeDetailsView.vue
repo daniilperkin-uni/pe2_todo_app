@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getAssignee, updateAssignee, deleteAssignee } from '@/services/apiService'
+import { getAssignee, updateAssignee, deleteAssignee, ApiError } from '@/services/apiService'
 import AssigneeForm from '@/components/AssigneeForm.vue'
 import type { Assignee, AssigneeCreateUpdate } from '@/types/assignee'
 import { showToast, Toast } from '@/ts/toasts'
@@ -18,6 +18,11 @@ const route = useRoute()
 const router = useRouter()
 const assignee = ref<Assignee | null>(null)
 const isLoading = ref<boolean>(true)
+// A failed load is NOT the same as a missing assignee: a 404 means the record
+// does not exist, while any other failure (500, offline, timeout) must offer a
+// retry instead of claiming the assignee was deleted.
+const loadError = ref<boolean>(false)
+const notFound = ref<boolean>(false)
 const isEditing = ref<boolean>(props.isEditing === true)
 const showDeleteConfirm = ref<boolean>(false)
 
@@ -26,14 +31,21 @@ const assigneeId = ref<number>(Number(props.id ?? route.params.id))
 // Ruft die Details des Zuständigen vom Backend ab.
 async function fetchAssignee() {
   isLoading.value = true
+  loadError.value = false
+  notFound.value = false
   try {
     assignee.value = await getAssignee(assigneeId.value)
   } catch (error) {
     console.error('Error fetching assignee:', error)
-    showToast(
-      new Toast('Error', 'Failed to load assignee details. Please try again later.', 'error')
-    )
-    assignee.value = null // Ensure it's null if not found or error
+    assignee.value = null
+    if (error instanceof ApiError && error.status === 404) {
+      notFound.value = true
+    } else {
+      loadError.value = true
+      showToast(
+        new Toast('Error', 'Failed to load assignee details. Please try again later.', 'error')
+      )
+    }
   } finally {
     isLoading.value = false
   }
@@ -112,7 +124,12 @@ onMounted(fetchAssignee)
     <h1 class="heading">Assignee Details</h1>
 
     <div v-if="isLoading">Loading assignee details...</div>
-    <div v-else-if="!assignee">Assignee not found.</div>
+    <div v-else-if="loadError" class="empty-state card">
+      <p class="empty-state-title">Failed to load assignee details</p>
+      <p class="empty-state-text">Please try again later.</p>
+      <Button mode="primary" @click="fetchAssignee">Retry</Button>
+    </div>
+    <div v-else-if="notFound || !assignee">Assignee not found.</div>
     <div v-else class="assignee-content">
       <div v-if="!isEditing" class="details-display card border-none">
         <p><strong>ID:</strong> {{ assignee.id }}</p>
@@ -183,6 +200,23 @@ onMounted(fetchAssignee)
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+.empty-state {
+  text-align: center;
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.empty-state-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.empty-state-text {
+  color: var(--color-text-light);
+  margin-bottom: var(--space-sm);
 }
 .modal-overlay {
   position: fixed;

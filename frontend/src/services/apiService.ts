@@ -6,6 +6,24 @@ import type { PriorityCorrectionStats } from '@/types/priorityCorrections'
 const API_BASE_URL = '/api/v1'
 
 /**
+ * Error raised for a failed API request.
+ *
+ * Carries the HTTP status so callers can tell a missing resource (404) apart
+ * from a transient server or network failure instead of treating both as
+ * "not found".
+ */
+export class ApiError extends Error {
+  /** HTTP status code of the failed response. */
+  readonly status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
+/**
  * Parses a fetch response, rejecting with an Error when the request failed.
  *
  * Handles JSON and empty/non-JSON responses uniformly so callers only have to
@@ -18,7 +36,10 @@ const API_BASE_URL = '/api/v1'
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorText = await response.text()
-    throw new Error(errorText || `API request failed with status ${response.status}`)
+    throw new ApiError(
+      errorText || `API request failed with status ${response.status}`,
+      response.status
+    )
   }
 
   // Only parse as JSON when the server advertises a JSON content type.
